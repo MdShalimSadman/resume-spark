@@ -1,65 +1,77 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+
+const messages = [
+  "Create modern, ATS-friendly resumes that get you noticed — fast.",
+  "Build polished resumes in minutes, not hours.",
+  "Stand out with clean, professional templates crafted for success.",
+];
+
+const TypingText = () => {
+  const [index, setIndex] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+  const [isNewMessage, setIsNewMessage] = useState(true);
+
+  useEffect(() => {
+    const fullText = messages[index];
+    let currentIndex = 0;
+
+    setIsNewMessage(true);
+
+    const typingInterval = setInterval(() => {
+      setDisplayed(fullText.slice(0, currentIndex + 1));
+      currentIndex++;
+
+      if (currentIndex === fullText.length) {
+        clearInterval(typingInterval);
+
+        setTimeout(() => {
+          setIndex((prev) => (prev + 1) % messages.length);
+        }, 1800);
+      }
+    }, 40);
+
+    return () => clearInterval(typingInterval);
+  }, [index]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <motion.h2
+      className="mt-5 text-xl text-gray-600 text-center"
+      initial={isNewMessage ? { opacity: 0 } : false}
+      animate={isNewMessage ? { opacity: 1 } : {}}
+      transition={{ duration: 0.3 }}
+      onAnimationComplete={() => setIsNewMessage(false)}
+    >
+      {displayed}
+    </motion.h2>
+  );
+};
+
+const Page = () => {
+  return (
+    <div className="p-12 w-full h-full flex flex-col items-center">
+      <Image
+        src="/images/logo-black.png"
+        width={250}
+        height={100}
+        alt="logo"
+        className="mt-12"
+      />
+
+      <h1
+        className="text-5xl text-center font-semibold mt-7 
+          bg-linear-to-b from-[#FE9415] via-[#FF6D23] to-[#FA332B]
+          text-transparent bg-clip-text"
+      >
+        Spark Your Potential with Professional Resumes
+      </h1>
+
+      <TypingText />
     </div>
   );
-}
+};
+
+export default Page;
