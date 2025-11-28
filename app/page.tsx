@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const messages = [
   "Create modern, ATS-friendly resumes that get you noticed — fast.",
@@ -52,7 +53,10 @@ const TypingText = () => {
 
 const Page = () => {
   return (
-    <div className="p-12 w-full h-full flex flex-col items-center">
+    <div className="relative min-h-screen p-12 w-full flex flex-col items-center overflow-hidden">
+      <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-[#FE9415] rounded-full blur-[140px] opacity-40 z-[-1] animate-pulse" />
+      <div className="absolute bottom-0 left-0 w-[350px] h-[350px] bg-[#FA332B] rounded-full blur-[140px] opacity-35 z-[-1] animate-pulse" />
+
       <Image
         src="/images/logo-black.png"
         width={250}
@@ -68,8 +72,18 @@ const Page = () => {
       >
         Spark Your Potential with Professional Resumes
       </h1>
-
       <TypingText />
+       <div className=" mt-16 flex items-center justify-center">
+        <Link href="/resume-editor" className="cursor-pointer hover:scale-105 transition-all duration-150">
+       <Image
+        src="/images/indigo-template.png"
+        className="shadow-xl rounded-xl"
+        alt="indigo-template"
+        width={150}
+        height={150}
+       />
+       </Link>
+       </div>
     </div>
   );
 };

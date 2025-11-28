@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, ReactElement, ReactNode } from 'react';
 import { Mail, Phone, MapPin, Globe, Plus, Trash2, Eye, Edit3 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { JSX } from 'react/jsx-runtime';
 
+// --- Interface Definitions (Kept from original code) ---
 interface Experience {
   id: string;
   company: string;
@@ -58,6 +59,9 @@ type PageContent = ReactElement;
 type PageRow = ReactElement;
 
 const PAGE_HEIGHT = 1000;
+
+// Helper to create a ref map for dynamic elements
+const createRefMap = () => new Map<string, React.RefObject<HTMLDivElement>>();
 
 const ResumeEditor = () => {
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
@@ -114,27 +118,100 @@ const ResumeEditor = () => {
 
   const [pageContents, setPageContents] = useState<PageRow[][]>([]);
 
+  // 1. Static Refs for Personal Information and the Edit Panel Container
+  const editPanelRef = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const positionRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const locationRef = useRef<HTMLInputElement>(null);
+  const portfolioRef = useRef<HTMLInputElement>(null);
+  const summaryRef = useRef<HTMLTextAreaElement>(null);
+
+  // 2. Dynamic Refs for collections (using HTMLDivElement for section containers)
+  const experienceRefs = useRef(createRefMap()).current;
+  const educationRefs = useRef(createRefMap()).current;
+  const skillRefs = useRef(createRefMap()).current;
+
+  // Function to ensure a ref object exists for a given ID and map
+  const getOrCreateRef = useCallback((id: string, refMap: Map<string, React.RefObject<HTMLDivElement>>) => {
+    if (!refMap.has(id)) {
+      refMap.set(id, { current: null });
+    }
+    return refMap.get(id)!;
+  }, []);
+
+  // 3. onPreviewClick Handler
+  const handlePreviewClick = useCallback((refKey: string, type: 'basic' | 'experience' | 'education' | 'skill', id?: string) => {
+    setViewMode('edit');
+
+    let targetRef: React.RefObject<HTMLElement> | null = null;
+
+    switch (type) {
+      case 'basic':
+        // Map basic fields to their refs (Input elements extend HTMLElement)
+        if (refKey === 'name') targetRef = nameRef;
+        if (refKey === 'position') targetRef = positionRef;
+        if (refKey === 'email') targetRef = emailRef;
+        if (refKey === 'phone') targetRef = phoneRef;
+        if (refKey === 'location') targetRef = locationRef;
+        if (refKey === 'portfolio') targetRef = portfolioRef;
+        if (refKey === 'summary') targetRef = summaryRef;
+        break;
+      case 'experience':
+        targetRef = experienceRefs.get(id || '') || null;
+        break;
+      case 'education':
+        targetRef = educationRefs.get(id || '') || null;
+        break;
+      case 'skill':
+        targetRef = skillRefs.get(id || '') || null;
+        break;
+      default:
+        break;
+    }
+
+    if (editPanelRef.current) {
+        // Scroll the edit panel container to the top first
+        editPanelRef.current.scrollTop = 0; 
+    }
+
+    // Use a slight delay to ensure the DOM has re-rendered in 'edit' mode before scrolling
+    setTimeout(() => {
+      if (targetRef?.current) {
+        // Scroll the target element into view within the scrollable edit panel
+        targetRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Optional: Focus the input/textarea if applicable (for basic fields)
+        if (refKey !== 'experience' && refKey !== 'education' && refKey !== 'skill' && targetRef.current.focus) {
+          targetRef.current.focus();
+        }
+      }
+    }, 100); 
+  }, [experienceRefs, educationRefs, skillRefs]);
+
+
+  // --- Resume Data Management Functions (Unchanged) ---
+
   const addExperience = () => {
     setResume(prev => ({
       ...prev,
       experiences: [...prev.experiences, {
         id: uuidv4(),
-        company: '',
-        title: '',
-        location: '',
-        startDate: '',
-        endDate: '',
-        current: false,
-        description: ''
+        company: '', title: '', location: '', startDate: '', endDate: '', current: false, description: ''
       }]
     }));
   };
 
   const removeExperience = (id: string) => {
-    setResume(prev => ({
-      ...prev,
-      experiences: prev.experiences.filter(exp => exp.id !== id)
-    }));
+    setResume(prev => {
+      // Clean up the ref when removing the item
+      experienceRefs.delete(id); 
+      return {
+        ...prev,
+        experiences: prev.experiences.filter(exp => exp.id !== id)
+      };
+    });
   };
 
   const updateExperience = (id: string, field: keyof Experience, value: string | boolean) => {
@@ -151,23 +228,20 @@ const ResumeEditor = () => {
       ...prev,
       education: [...prev.education, {
         id: uuidv4(),
-        degree: '',
-        field: '',
-        institution: '',
-        location: '',
-        startDate: '',
-        endDate: '',
-        current: false,
-        description: ''
+        degree: '', field: '', institution: '', location: '', startDate: '', endDate: '', current: false, description: ''
       }]
     }));
   };
 
   const removeEducation = (id: string) => {
-    setResume(prev => ({
-      ...prev,
-      education: prev.education.filter(edu => edu.id !== id)
-    }));
+    setResume(prev => {
+      // Clean up the ref when removing the item
+      educationRefs.delete(id); 
+      return {
+        ...prev,
+        education: prev.education.filter(edu => edu.id !== id)
+      };
+    });
   };
 
   const updateEducation = (id: string, field: keyof Education, value: string | boolean) => {
@@ -191,10 +265,14 @@ const ResumeEditor = () => {
   };
 
   const removeSkill = (id: string) => {
-    setResume(prev => ({
-      ...prev,
-      skills: prev.skills.filter(skill => skill.id !== id)
-    }));
+    setResume(prev => {
+      // Clean up the ref when removing the item
+      skillRefs.delete(id); 
+      return {
+        ...prev,
+        skills: prev.skills.filter(skill => skill.id !== id)
+      };
+    });
   };
 
   const updateSkill = (id: string, field: keyof Skill, value: string) => {
@@ -206,6 +284,8 @@ const ResumeEditor = () => {
     }));
   };
 
+  // --- Page Splitting Logic (Used for Preview) ---
+
   useEffect(() => {
     const splitIntoPages = () => {
       const pages: PageRow[][] = [];
@@ -216,11 +296,35 @@ const ResumeEditor = () => {
       let rightColumnHeight = 0;
       let isFirstPage = true;
 
+      // Ensure a block is clickable and updates viewMode/scrolls to target
+      const clickableWrapper = (element: ReactElement, refKey: string, type: 'basic' | 'experience' | 'education' | 'skill', id?: string) => {
+        return (
+          <div 
+            // Use cloneElement to add props to the root element of the block content
+            {...element.props} 
+            className={`${element.props.className || ''} cursor-pointer hover:bg-gray-100 p-1 rounded transition-colors`}
+            onClick={() => handlePreviewClick(refKey, type, id)}
+          >
+            {element.props.children}
+          </div>
+        );
+      };
+
       const headerBlock: Block = {
         element: (
           <div key="header-block" className="mb-6 border-b-4 border-indigo-600 pb-4">
-            <h1 className="text-4xl font-bold text-gray-900">{resume.name}</h1>
-            <p className="text-xl text-indigo-600 mt-1">{resume.position}</p>
+            <h1 
+              className="text-4xl font-bold text-gray-900 cursor-pointer hover:text-indigo-700 transition-colors"
+              onClick={() => handlePreviewClick('name', 'basic')}
+            >
+              {resume.name}
+            </h1>
+            <p 
+              className="text-xl text-indigo-600 mt-1 cursor-pointer hover:text-indigo-700 transition-colors"
+              onClick={() => handlePreviewClick('position', 'basic')}
+            >
+              {resume.position}
+            </p>
           </div>
         ),
         height: 120
@@ -233,20 +337,20 @@ const ResumeEditor = () => {
               CONTACT
             </h2>
             <div className="space-y-2 text-sm">
-              <div key="contact-mail" className="flex items-start gap-2">
+              <div key="contact-mail" className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 p-0.5 rounded transition-colors" onClick={() => handlePreviewClick('email', 'basic')}>
                 <Mail className="text-indigo-600 mt-0.5 flex-shrink-0" size={16} />
                 <span className="text-gray-700">{resume.email}</span>
               </div>
-              <div key="contact-phone" className="flex items-start gap-2">
+              <div key="contact-phone" className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 p-0.5 rounded transition-colors" onClick={() => handlePreviewClick('phone', 'basic')}>
                 <Phone className="text-indigo-600 mt-0.5 flex-shrink-0" size={16} />
                 <span className="text-gray-700">{resume.phone}</span>
               </div>
-              <div key="contact-location" className="flex items-start gap-2">
+              <div key="contact-location" className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 p-0.5 rounded transition-colors" onClick={() => handlePreviewClick('location', 'basic')}>
                 <MapPin className="text-indigo-600 mt-0.5 flex-shrink-0" size={16} />
                 <span className="text-gray-700">{resume.location}</span>
               </div>
               {resume.portfolio && (
-                <div key="contact-portfolio" className="flex items-start gap-2">
+                <div key="contact-portfolio" className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 p-0.5 rounded transition-colors" onClick={() => handlePreviewClick('portfolio', 'basic')}>
                   <Globe className="text-indigo-600 mt-0.5 flex-shrink-0" size={16} />
                   <span className="text-gray-700">{resume.portfolio}</span>
                 </div>
@@ -271,24 +375,26 @@ const ResumeEditor = () => {
       };
 
       const skillBlocks: Block[] = resume.skills.map(skill => ({
-        element: (
+        element: clickableWrapper(
           <div key={skill.id} className="mb-3">
             <p className="font-semibold text-gray-900 text-sm">{skill.name}</p>
             <p className="text-xs text-gray-600">{skill.level}</p>
-          </div>
+          </div>,
+          'skill', 'skill', skill.id
         ),
         height: 50,
         isLeftColumn: true
       }));
 
       const summaryBlock: Block | null = resume.summary ? {
-        element: (
+        element: clickableWrapper(
           <div key="summary-block" className="mb-6">
             <h2 className="text-lg font-bold text-gray-900 mb-3 pb-2 border-b-2 border-indigo-600">
               PROFESSIONAL SUMMARY
             </h2>
             <p className="text-sm text-gray-700 leading-relaxed">{resume.summary}</p>
-          </div>
+          </div>,
+          'summary', 'basic'
         ),
         height: 120,
         isRightColumn: true
@@ -307,7 +413,7 @@ const ResumeEditor = () => {
       };
 
       const experienceBlocks: Block[] = resume.experiences.map(exp => ({
-        element: (
+        element: clickableWrapper(
           <div key={exp.id} className="mb-5">
             <p className="font-bold text-gray-900">{exp.company}</p>
             <p className="text-sm text-indigo-600 font-semibold">{exp.title}</p>
@@ -315,7 +421,8 @@ const ResumeEditor = () => {
               {exp.location} | {exp.startDate} - {exp.current ? 'Present' : exp.endDate}
             </p>
             <p className="text-sm text-gray-700 mt-2 leading-relaxed">{exp.description}</p>
-          </div>
+          </div>,
+          'experience', 'experience', exp.id
         ),
         height: 140,
         isRightColumn: true
@@ -334,7 +441,7 @@ const ResumeEditor = () => {
       };
 
       const educationBlocks: Block[] = resume.education.map(edu => ({
-        element: (
+        element: clickableWrapper(
           <div key={edu.id} className="mb-5">
             <p className="font-bold text-gray-900">
               {edu.degree}{edu.field && ` in ${edu.field}`}
@@ -346,7 +453,8 @@ const ResumeEditor = () => {
             {edu.description && (
               <p className="text-sm text-gray-700 mt-2 leading-relaxed">{edu.description}</p>
             )}
-          </div>
+          </div>,
+          'education', 'education', edu.id
         ),
         height: 120,
         isRightColumn: true
@@ -367,7 +475,6 @@ const ResumeEditor = () => {
         if (leftColumn.length > 0 || rightColumn.length > 0) {
           pages.push([...currentPage, renderContentRow(leftColumn, rightColumn, `content-row-${pages.length}-${currentPage.length}`)]);
         } else if (currentPage.length > 0) {
-          // If only header/full-width content exists on the last page
           pages.push([...currentPage]);
         }
         currentPage = [];
@@ -383,22 +490,26 @@ const ResumeEditor = () => {
 
         const { element, height, isLeftColumn, isRightColumn } = block;
 
-        if (isLeftColumn && leftColumnHeight + height > PAGE_HEIGHT - 120) {
+        const PAGE_LIMIT = PAGE_HEIGHT - 120; 
+
+        const doesLeftColumnOverflow = isLeftColumn && leftColumnHeight + height > PAGE_LIMIT;
+        const doesRightColumnOverflow = isRightColumn && rightColumnHeight + height > PAGE_LIMIT;
+
+        if (doesLeftColumnOverflow || doesRightColumnOverflow) {
           if (leftColumn.length > 0 || rightColumn.length > 0) {
             currentPage.push(renderContentRow(leftColumn, rightColumn, `content-row-${pages.length}-${currentPage.length}`));
           }
-          finishPage();
-          leftColumn.push(element);
-          leftColumnHeight = height;
-          rightColumnHeight = 0;
-        } else if (isRightColumn && rightColumnHeight + height > PAGE_HEIGHT - 120) {
-          if (leftColumn.length > 0 || rightColumn.length > 0) {
-            currentPage.push(renderContentRow(leftColumn, rightColumn, `content-row-${pages.length}-${currentPage.length}`));
+          finishPage(); // Start a new page
+          
+          if (isLeftColumn) {
+            leftColumn.push(element);
+            leftColumnHeight = height;
+            rightColumnHeight = 0;
+          } else if (isRightColumn) {
+            rightColumn.push(element);
+            rightColumnHeight = height;
+            leftColumnHeight = 0;
           }
-          finishPage();
-          rightColumn.push(element);
-          rightColumnHeight = height;
-          leftColumnHeight = 0;
         } else {
           if (isLeftColumn) {
             leftColumn.push(element);
@@ -437,7 +548,9 @@ const ResumeEditor = () => {
     };
 
     splitIntoPages();
-  }, [resume]);
+  }, [resume, handlePreviewClick]);
+  
+  // --- Render (Refactored to attach dynamic refs) ---
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
@@ -472,31 +585,40 @@ const ResumeEditor = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {viewMode === 'edit' && (
-            <div className="bg-white rounded-xl shadow-lg p-6 space-y-6 max-h-[900px] overflow-y-auto">
+            // Attach ref to the edit panel wrapper for scroll control
+            <div ref={editPanelRef} className="bg-white rounded-xl shadow-lg p-6 space-y-6 max-h-[900px] overflow-y-auto">
+              
+              {/* Personal Information */}
               <div>
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h2>
                 <div className="space-y-4">
+                  {/* Name Input */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                     <input
+                      ref={nameRef} 
                       type="text"
                       value={resume.name}
                       onChange={(e) => setResume({...resume, name: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                   </div>
+                  {/* Position Input */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
                     <input
+                      ref={positionRef} 
                       type="text"
                       value={resume.position}
                       onChange={(e) => setResume({...resume, position: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                   </div>
+                  {/* Contact Inputs */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <input
+                      ref={emailRef} 
                       type="email"
                       value={resume.email}
                       onChange={(e) => setResume({...resume, email: e.target.value})}
@@ -506,6 +628,7 @@ const ResumeEditor = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                     <input
+                      ref={phoneRef} 
                       type="tel"
                       value={resume.phone}
                       onChange={(e) => setResume({...resume, phone: e.target.value})}
@@ -515,6 +638,7 @@ const ResumeEditor = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
                     <input
+                      ref={locationRef} 
                       type="text"
                       value={resume.location}
                       onChange={(e) => setResume({...resume, location: e.target.value})}
@@ -524,15 +648,18 @@ const ResumeEditor = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Portfolio/Website</label>
                     <input
+                      ref={portfolioRef} 
                       type="text"
                       value={resume.portfolio}
                       onChange={(e) => setResume({...resume, portfolio: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                   </div>
+                  {/* Summary Input */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Professional Summary</label>
                     <textarea
+                      ref={summaryRef} 
                       value={resume.summary}
                       onChange={(e) => setResume({...resume, summary: e.target.value})}
                       rows={3}
@@ -542,6 +669,7 @@ const ResumeEditor = () => {
                 </div>
               </div>
 
+              {/* Work Experience */}
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-bold text-gray-900">Work Experience</h2>
@@ -553,7 +681,12 @@ const ResumeEditor = () => {
                   </button>
                 </div>
                 {resume.experiences.map((exp) => (
-                  <div key={exp.id} className="mb-4 p-4 border border-gray-200 rounded-lg">
+                  // Attach a ref to the container of the experience block
+                  <div 
+                    key={exp.id} 
+                    ref={getOrCreateRef(exp.id, experienceRefs)} 
+                    className="mb-4 p-4 border border-gray-200 rounded-lg"
+                  >
                     <div className="flex justify-between items-start mb-3">
                       <h3 className="font-semibold text-gray-900">Experience</h3>
                       <button
@@ -623,6 +756,7 @@ const ResumeEditor = () => {
                 ))}
               </div>
 
+              {/* Education */}
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-bold text-gray-900">Education</h2>
@@ -634,7 +768,12 @@ const ResumeEditor = () => {
                   </button>
                 </div>
                 {resume.education.map((edu) => (
-                  <div key={edu.id} className="mb-4 p-4 border border-gray-200 rounded-lg">
+                  // Attach a ref to the container of the education block
+                  <div 
+                    key={edu.id} 
+                    ref={getOrCreateRef(edu.id, educationRefs)} 
+                    className="mb-4 p-4 border border-gray-200 rounded-lg"
+                  >
                     <div className="flex justify-between items-start mb-3">
                       <h3 className="font-semibold text-gray-900">Education</h3>
                       <button
@@ -711,6 +850,7 @@ const ResumeEditor = () => {
                 ))}
               </div>
 
+              {/* Skills */}
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-bold text-gray-900">Skills</h2>
@@ -722,7 +862,12 @@ const ResumeEditor = () => {
                   </button>
                 </div>
                 {resume.skills.map((skill) => (
-                  <div key={skill.id} className="mb-3 p-3 border border-gray-200 rounded-lg flex gap-3 items-center">
+                  // Attach a ref to the container of the skill block
+                  <div 
+                    key={skill.id} 
+                    ref={getOrCreateRef(skill.id, skillRefs)}
+                    className="mb-3 p-3 border border-gray-200 rounded-lg flex gap-3 items-center"
+                  >
                     <input
                       type="text"
                       placeholder="Skill Name"
