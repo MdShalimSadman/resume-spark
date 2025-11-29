@@ -1,8 +1,25 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback, ReactElement, ReactNode, createRef } from 'react';
-import { Mail, Phone, MapPin, Globe, Plus, Trash2, Eye, Edit3 } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  ReactElement,
+  ReactNode,
+  createRef,
+} from "react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
+  Plus,
+  Trash2,
+  Eye,
+  Edit3,
+} from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
 
 interface Experience {
   id: string;
@@ -30,7 +47,7 @@ interface Education {
 interface Skill {
   id: string;
   name: string;
-  level: 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
+  level: "Beginner" | "Intermediate" | "Advanced" | "Expert";
 }
 
 interface ResumeData {
@@ -62,56 +79,60 @@ const PAGE_HEIGHT = 1000;
 const createRefMap = () => new Map<string, React.RefObject<HTMLDivElement>>();
 
 const ResumeEditor = () => {
-  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+  const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
   const [resume, setResume] = useState<ResumeData>({
-    name: 'John Doe',
-    position: 'Senior Software Engineer',
-    email: 'john.doe@email.com',
-    phone: '+1 (555) 123-4567',
-    location: 'San Francisco, CA',
-    portfolio: 'www.johndoe.dev',
-    summary: 'Experienced software engineer with 8+ years of expertise in full-stack development, specializing in React, Node.js, and cloud technologies.',
+    name: "John Doe",
+    position: "Senior Software Engineer",
+    email: "john.doe@email.com",
+    phone: "+1 (555) 123-4567",
+    location: "San Francisco, CA",
+    portfolio: "www.johndoe.dev",
+    summary:
+      "Experienced software engineer with 8+ years of expertise in full-stack development, specializing in React, Node.js, and cloud technologies.",
     experiences: [
       {
         id: uuidv4(),
-        company: 'Tech Corp Inc.',
-        title: 'Senior Software Engineer',
-        location: 'San Francisco, CA',
-        startDate: 'Jan 2020',
-        endDate: 'Present',
+        company: "Tech Corp Inc.",
+        title: "Senior Software Engineer",
+        location: "San Francisco, CA",
+        startDate: "Jan 2020",
+        endDate: "Present",
         current: true,
-        description: 'Led development of microservices architecture serving 2M+ users. Implemented CI/CD pipelines reducing deployment time by 60%.'
+        description:
+          "Led development of microservices architecture serving 2M+ users. Implemented CI/CD pipelines reducing deployment time by 60%.",
       },
       {
         id: uuidv4(),
-        company: 'StartUp Labs',
-        title: 'Full Stack Developer',
-        location: 'Austin, TX',
-        startDate: 'Jun 2017',
-        endDate: 'Dec 2019',
+        company: "StartUp Labs",
+        title: "Full Stack Developer",
+        location: "Austin, TX",
+        startDate: "Jun 2017",
+        endDate: "Dec 2019",
         current: false,
-        description: 'Built scalable web applications using React and Node.js. Collaborated with cross-functional teams to deliver features on time.'
-      }
+        description:
+          "Built scalable web applications using React and Node.js. Collaborated with cross-functional teams to deliver features on time.",
+      },
     ],
     education: [
       {
         id: uuidv4(),
-        degree: 'Bachelor of Science',
-        field: 'Computer Science',
-        institution: 'Stanford University',
-        location: 'Stanford, CA',
-        startDate: '2013',
-        endDate: '2017',
+        degree: "Bachelor of Science",
+        field: "Computer Science",
+        institution: "Stanford University",
+        location: "Stanford, CA",
+        startDate: "2013",
+        endDate: "2017",
         current: false,
-        description: 'GPA: 3.8/4.0. Focus on algorithms, data structures, and software engineering.'
-      }
+        description:
+          "GPA: 3.8/4.0. Focus on algorithms, data structures, and software engineering.",
+      },
     ],
     skills: [
-      { id: uuidv4(), name: 'JavaScript/TypeScript', level: 'Expert' },
-      { id: uuidv4(), name: 'React & Next.js', level: 'Expert' },
-      { id: uuidv4(), name: 'Node.js & Express', level: 'Advanced' },
-      { id: uuidv4(), name: 'AWS & Docker', level: 'Advanced' }
-    ]
+      { id: uuidv4(), name: "JavaScript/TypeScript", level: "Expert" },
+      { id: uuidv4(), name: "React & Next.js", level: "Expert" },
+      { id: uuidv4(), name: "Node.js & Express", level: "Advanced" },
+      { id: uuidv4(), name: "AWS & Docker", level: "Advanced" },
+    ],
   });
 
   const [pageContents, setPageContents] = useState<PageRow[][]>([]);
@@ -125,199 +146,273 @@ const ResumeEditor = () => {
   const portfolioRef = useRef<HTMLInputElement>(null);
   const summaryRef = useRef<HTMLTextAreaElement>(null);
 
-
   const experienceRefs = useRef(createRefMap()).current;
   const educationRefs = useRef(createRefMap()).current;
   const skillRefs = useRef(createRefMap()).current;
 
-
-const getOrCreateRef = useCallback(
-  (
-    id: string,
-    refMap: Map<string, React.RefObject<HTMLDivElement | null>>
-  ) => {
-    if (!refMap.has(id)) {
-      refMap.set(id, createRef<HTMLDivElement>());
-    }
-    return refMap.get(id)!;
-  },
-  []
-);
-
-  const handlePreviewClick = useCallback((refKey: string, type: 'basic' | 'experience' | 'education' | 'skill', id?: string) => {
-    setViewMode('edit');
-
-    let targetRef: React.RefObject<HTMLElement> | null = null;
-
-    switch (type) {
-      case 'basic':
-        // Map basic fields to their refs (Input elements extend HTMLElement)
-        if (refKey === 'name') targetRef = nameRef;
-        if (refKey === 'position') targetRef = positionRef;
-        if (refKey === 'email') targetRef = emailRef;
-        if (refKey === 'phone') targetRef = phoneRef;
-        if (refKey === 'location') targetRef = locationRef;
-        if (refKey === 'portfolio') targetRef = portfolioRef;
-        if (refKey === 'summary') targetRef = summaryRef;
-        break;
-      case 'experience':
-        targetRef = experienceRefs.get(id || '') || null;
-        break;
-      case 'education':
-        targetRef = educationRefs.get(id || '') || null;
-        break;
-      case 'skill':
-        targetRef = skillRefs.get(id || '') || null;
-        break;
-      default:
-        break;
-    }
-
-    if (editPanelRef.current) {
-        editPanelRef.current.scrollTop = 0; 
-    }
-
-
-    setTimeout(() => {
-      if (targetRef?.current) {
-
-        targetRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        if (refKey !== 'experience' && refKey !== 'education' && refKey !== 'skill' && targetRef.current.focus) {
-          targetRef.current.focus();
-        }
+  const getOrCreateRef = useCallback(
+    (
+      id: string,
+      refMap: Map<string, React.RefObject<HTMLDivElement | null>>
+    ) => {
+      if (!refMap.has(id)) {
+        refMap.set(id, createRef<HTMLDivElement>());
       }
-    }, 100); 
-  }, [experienceRefs, educationRefs, skillRefs]);
+      return refMap.get(id)!;
+    },
+    []
+  );
 
+  const handlePreviewClick = useCallback(
+    (
+      refKey: string,
+      type: "basic" | "experience" | "education" | "skill",
+      id?: string
+    ) => {
+      setViewMode("edit");
 
+      // FIX 1: Broaden the type of targetRef to include all possible element types (HTMLInputElement, HTMLTextAreaElement, HTMLDivElement)
+      let targetRef: React.RefObject<
+        HTMLInputElement | HTMLTextAreaElement | HTMLDivElement
+      > | null = null;
 
+      switch (type) {
+        case "basic":
+          // Assigning specific Refs (nameRef, summaryRef, etc.) to the broader targetRef
+          if (refKey === "name")
+            targetRef = nameRef as React.RefObject<HTMLInputElement>;
+          if (refKey === "position")
+            targetRef = positionRef as React.RefObject<HTMLInputElement>;
+          if (refKey === "email")
+            targetRef = emailRef as React.RefObject<HTMLInputElement>;
+          if (refKey === "phone")
+            targetRef = phoneRef as React.RefObject<HTMLInputElement>;
+          if (refKey === "location")
+            targetRef = locationRef as React.RefObject<HTMLInputElement>;
+          if (refKey === "portfolio")
+            targetRef = portfolioRef as React.RefObject<HTMLInputElement>;
+          if (refKey === "summary")
+            targetRef = summaryRef as React.RefObject<HTMLTextAreaElement>;
+          break;
+        case "experience":
+          targetRef = experienceRefs.get(id || "") || null;
+          break;
+        case "education":
+          targetRef = educationRefs.get(id || "") || null;
+          break;
+        case "skill":
+          targetRef = skillRefs.get(id || "") || null;
+          break;
+        default:
+          break;
+      }
+
+      if (editPanelRef.current) {
+        editPanelRef.current.scrollTop = 0;
+      }
+
+      setTimeout(() => {
+        if (targetRef?.current) {
+          const element = targetRef.current;
+
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+
+          // FIX 2: Use a type assertion (e.g., to HTMLInputElement) to explicitly define the type
+          // before calling .focus(), satisfying noImplicitAny. We also check if focus is a function.
+          if (
+            refKey !== "experience" &&
+            refKey !== "education" &&
+            refKey !== "skill"
+          ) {
+            if (typeof (element as HTMLInputElement).focus === "function") {
+              (element as HTMLInputElement).focus();
+            }
+          }
+        }
+      }, 100);
+    },
+    [
+      experienceRefs,
+      educationRefs,
+      skillRefs,
+      nameRef,
+      positionRef,
+      emailRef,
+      phoneRef,
+      locationRef,
+      portfolioRef,
+      summaryRef,
+    ]
+  );
 
   const addExperience = () => {
-    setResume(prev => ({
+    setResume((prev) => ({
       ...prev,
-      experiences: [...prev.experiences, {
-        id: uuidv4(),
-        company: '', title: '', location: '', startDate: '', endDate: '', current: false, description: ''
-      }]
+      experiences: [
+        ...prev.experiences,
+        {
+          id: uuidv4(),
+          company: "",
+          title: "",
+          location: "",
+          startDate: "",
+          endDate: "",
+          current: false,
+          description: "",
+        },
+      ],
     }));
   };
 
   const removeExperience = (id: string) => {
-    setResume(prev => {
+    setResume((prev) => {
       // Clean up the ref when removing the item
-      experienceRefs.delete(id); 
+      experienceRefs.delete(id);
       return {
         ...prev,
-        experiences: prev.experiences.filter(exp => exp.id !== id)
+        experiences: prev.experiences.filter((exp) => exp.id !== id),
       };
     });
   };
 
-  const updateExperience = (id: string, field: keyof Experience, value: string | boolean) => {
-    setResume(prev => ({
+  const updateExperience = (
+    id: string,
+    field: keyof Experience,
+    value: string | boolean
+  ) => {
+    setResume((prev) => ({
       ...prev,
-      experiences: prev.experiences.map(exp => 
+      experiences: prev.experiences.map((exp) =>
         exp.id === id ? { ...exp, [field]: value } : exp
-      )
+      ),
     }));
   };
 
   const addEducation = () => {
-    setResume(prev => ({
+    setResume((prev) => ({
       ...prev,
-      education: [...prev.education, {
-        id: uuidv4(),
-        degree: '', field: '', institution: '', location: '', startDate: '', endDate: '', current: false, description: ''
-      }]
+      education: [
+        ...prev.education,
+        {
+          id: uuidv4(),
+          degree: "",
+          field: "",
+          institution: "",
+          location: "",
+          startDate: "",
+          endDate: "",
+          current: false,
+          description: "",
+        },
+      ],
     }));
   };
 
   const removeEducation = (id: string) => {
-    setResume(prev => {
+    setResume((prev) => {
       // Clean up the ref when removing the item
-      educationRefs.delete(id); 
+      educationRefs.delete(id);
       return {
         ...prev,
-        education: prev.education.filter(edu => edu.id !== id)
+        education: prev.education.filter((edu) => edu.id !== id),
       };
     });
   };
 
-  const updateEducation = (id: string, field: keyof Education, value: string | boolean) => {
-    setResume(prev => ({
+  const updateEducation = (
+    id: string,
+    field: keyof Education,
+    value: string | boolean
+  ) => {
+    setResume((prev) => ({
       ...prev,
-      education: prev.education.map(edu => 
+      education: prev.education.map((edu) =>
         edu.id === id ? { ...edu, [field]: value } : edu
-      )
+      ),
     }));
   };
 
   const addSkill = () => {
-    setResume(prev => ({
+    setResume((prev) => ({
       ...prev,
-      skills: [...prev.skills, {
-        id: uuidv4(),
-        name: '',
-        level: 'Beginner'
-      }]
+      skills: [
+        ...prev.skills,
+        {
+          id: uuidv4(),
+          name: "",
+          level: "Beginner",
+        },
+      ],
     }));
   };
 
   const removeSkill = (id: string) => {
-    setResume(prev => {
+    setResume((prev) => {
       // Clean up the ref when removing the item
-      skillRefs.delete(id); 
+      skillRefs.delete(id);
       return {
         ...prev,
-        skills: prev.skills.filter(skill => skill.id !== id)
+        skills: prev.skills.filter((skill) => skill.id !== id),
       };
     });
   };
 
   const updateSkill = (id: string, field: keyof Skill, value: string) => {
-    setResume(prev => ({
+    setResume((prev) => ({
       ...prev,
-      skills: prev.skills.map(skill => 
-        skill.id === id ? { ...skill, [field]: value as Skill[typeof field] } : skill
-      )
+      skills: prev.skills.map((skill) =>
+        skill.id === id
+          ? { ...skill, [field]: value as Skill[typeof field] }
+          : skill
+      ),
     }));
   };
 
   // --- Page Splitting Logic (Used for Preview) ---
 
-useEffect(() => {
+  useEffect(() => {
     const splitIntoPages = () => {
-      const clickableWrapper = (element: ReactElement, refKey: string, type: 'basic' | 'experience' | 'education' | 'skill', id?: string) => {
+      const clickableWrapper = (
+        element: ReactElement<{ className?: string; children?: ReactNode }>,
+        refKey: string,
+        type: "basic" | "experience" | "education" | "skill",
+        id?: string
+      ) => {
+        const { className, children, ...restProps } = element.props;
         return (
-          <div 
-            {...element.props} 
-            className={`${element.props.className || ''} cursor-pointer hover:bg-gray-100 p-1 rounded transition-colors`}
+          <div
+            {...restProps}
+            className={`${
+              className || ""
+            } cursor-pointer hover:bg-gray-100 p-1 rounded transition-colors`}
             onClick={() => handlePreviewClick(refKey, type, id)}
           >
-            {element.props.children}
+            {children}
           </div>
         );
       };
 
       const headerBlock: Block = {
         element: (
-          <div key="header-block" className="mb-6 border-b-4 border-indigo-600 pb-4">
-            <h1 
+          <div
+            key="header-block"
+            className="mb-6 border-b-4 border-indigo-600 pb-4"
+          >
+            <h1
               className="text-4xl font-bold text-gray-900 cursor-pointer hover:text-indigo-700 transition-colors"
-              onClick={() => handlePreviewClick('name', 'basic')}
+              onClick={() => handlePreviewClick("name", "basic")}
             >
               {resume.name}
             </h1>
-            <p 
+            <p
               className="text-xl text-indigo-600 mt-1 cursor-pointer hover:text-indigo-700 transition-colors"
-              onClick={() => handlePreviewClick('position', 'basic')}
+              onClick={() => handlePreviewClick("position", "basic")}
             >
               {resume.position}
             </p>
           </div>
         ),
-        height: 120
+        height: 120,
       };
 
       const contactBlock: Block = {
@@ -327,21 +422,40 @@ useEffect(() => {
               CONTACT
             </h2>
             <div className="space-y-2 text-sm">
-              <div key="contact-mail" className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 p-0.5 rounded transition-colors" onClick={() => handlePreviewClick('email', 'basic')}>
-                <Mail className="text-indigo-600 mt-0.5 flex-shrink-0" size={16} />
+              <div
+                key="contact-mail"
+                className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 p-0.5 rounded transition-colors"
+                onClick={() => handlePreviewClick("email", "basic")}
+              >
+                <Mail className="text-indigo-600 mt-0.5 shrink-0" size={16} />
                 <span className="text-gray-700">{resume.email}</span>
               </div>
-              <div key="contact-phone" className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 p-0.5 rounded transition-colors" onClick={() => handlePreviewClick('phone', 'basic')}>
-                <Phone className="text-indigo-600 mt-0.5 flex-shrink-0" size={16} />
+              <div
+                key="contact-phone"
+                className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 p-0.5 rounded transition-colors"
+                onClick={() => handlePreviewClick("phone", "basic")}
+              >
+                <Phone className="text-indigo-600 mt-0.5 shrink-0" size={16} />
                 <span className="text-gray-700">{resume.phone}</span>
               </div>
-              <div key="contact-location" className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 p-0.5 rounded transition-colors" onClick={() => handlePreviewClick('location', 'basic')}>
-                <MapPin className="text-indigo-600 mt-0.5 flex-shrink-0" size={16} />
+              <div
+                key="contact-location"
+                className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 p-0.5 rounded transition-colors"
+                onClick={() => handlePreviewClick("location", "basic")}
+              >
+                <MapPin className="text-indigo-600 mt-0.5 shrink-0" size={16} />
                 <span className="text-gray-700">{resume.location}</span>
               </div>
               {resume.portfolio && (
-                <div key="contact-portfolio" className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 p-0.5 rounded transition-colors" onClick={() => handlePreviewClick('portfolio', 'basic')}>
-                  <Globe className="text-indigo-600 mt-0.5 flex-shrink-0" size={16} />
+                <div
+                  key="contact-portfolio"
+                  className="flex items-start gap-2 cursor-pointer hover:bg-gray-100 p-0.5 rounded transition-colors"
+                  onClick={() => handlePreviewClick("portfolio", "basic")}
+                >
+                  <Globe
+                    className="text-indigo-600 mt-0.5 shrink-0"
+                    size={16}
+                  />
                   <span className="text-gray-700">{resume.portfolio}</span>
                 </div>
               )}
@@ -349,7 +463,7 @@ useEffect(() => {
           </div>
         ),
         height: 180,
-        isLeftColumn: true
+        isLeftColumn: true,
       };
 
       const skillsHeaderBlock: Block = {
@@ -361,34 +475,41 @@ useEffect(() => {
           </div>
         ),
         height: 40,
-        isLeftColumn: true
+        isLeftColumn: true,
       };
 
-      const skillBlocks: Block[] = resume.skills.map(skill => ({
+      const skillBlocks: Block[] = resume.skills.map((skill) => ({
         element: clickableWrapper(
           <div key={skill.id} className="mb-3">
             <p className="font-semibold text-gray-900 text-sm">{skill.name}</p>
             <p className="text-xs text-gray-600">{skill.level}</p>
           </div>,
-          'skill', 'skill', skill.id
+          "skill",
+          "skill",
+          skill.id
         ),
         height: 50,
-        isLeftColumn: true
+        isLeftColumn: true,
       }));
 
-      const summaryBlock: Block | null = resume.summary ? {
-        element: clickableWrapper(
-          <div key="summary-block" className="mb-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-3 pb-2 border-b-2 border-indigo-600">
-              PROFESSIONAL SUMMARY
-            </h2>
-            <p className="text-sm text-gray-700 leading-relaxed">{resume.summary}</p>
-          </div>,
-          'summary', 'basic'
-        ),
-        height: 120,
-        isRightColumn: true
-      } : null;
+      const summaryBlock: Block | null = resume.summary
+        ? {
+            element: clickableWrapper(
+              <div key="summary-block" className="mb-6">
+                <h2 className="text-lg font-bold text-gray-900 mb-3 pb-2 border-b-2 border-indigo-600">
+                  PROFESSIONAL SUMMARY
+                </h2>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {resume.summary}
+                </p>
+              </div>,
+              "summary",
+              "basic"
+            ),
+            height: 120,
+            isRightColumn: true,
+          }
+        : null;
 
       const experienceHeaderBlock: Block = {
         element: (
@@ -399,23 +520,28 @@ useEffect(() => {
           </div>
         ),
         height: 40,
-        isRightColumn: true
+        isRightColumn: true,
       };
 
-      const experienceBlocks: Block[] = resume.experiences.map(exp => ({
+      const experienceBlocks: Block[] = resume.experiences.map((exp) => ({
         element: clickableWrapper(
           <div key={exp.id} className="mb-5">
             <p className="font-bold text-gray-900">{exp.company}</p>
             <p className="text-sm text-indigo-600 font-semibold">{exp.title}</p>
             <p className="text-xs text-gray-600">
-              {exp.location} | {exp.startDate} - {exp.current ? 'Present' : exp.endDate}
+              {exp.location} | {exp.startDate} -{" "}
+              {exp.current ? "Present" : exp.endDate}
             </p>
-            <p className="text-sm text-gray-700 mt-2 leading-relaxed">{exp.description}</p>
+            <p className="text-sm text-gray-700 mt-2 leading-relaxed">
+              {exp.description}
+            </p>
           </div>,
-          'experience', 'experience', exp.id
+          "experience",
+          "experience",
+          exp.id
         ),
         height: 140,
-        isRightColumn: true
+        isRightColumn: true,
       }));
 
       const educationHeaderBlock: Block = {
@@ -427,34 +553,42 @@ useEffect(() => {
           </div>
         ),
         height: 40,
-        isRightColumn: true
+        isRightColumn: true,
       };
 
-      const educationBlocks: Block[] = resume.education.map(edu => ({
+      const educationBlocks: Block[] = resume.education.map((edu) => ({
         element: clickableWrapper(
           <div key={edu.id} className="mb-5">
             <p className="font-bold text-gray-900">
-              {edu.degree}{edu.field && ` in ${edu.field}`}
+              {edu.degree}
+              {edu.field && ` in ${edu.field}`}
             </p>
-            <p className="text-sm text-indigo-600 font-semibold">{edu.institution}</p>
+            <p className="text-sm text-indigo-600 font-semibold">
+              {edu.institution}
+            </p>
             <p className="text-xs text-gray-600">
-              {edu.location} | {edu.startDate} - {edu.current ? 'Present' : edu.endDate}
+              {edu.location} | {edu.startDate} -{" "}
+              {edu.current ? "Present" : edu.endDate}
             </p>
             {edu.description && (
-              <p className="text-sm text-gray-700 mt-2 leading-relaxed">{edu.description}</p>
+              <p className="text-sm text-gray-700 mt-2 leading-relaxed">
+                {edu.description}
+              </p>
             )}
           </div>,
-          'education', 'education', edu.id
+          "education",
+          "education",
+          edu.id
         ),
         height: 120,
-        isRightColumn: true
+        isRightColumn: true,
       }));
 
       // Collect all left and right column blocks
       const leftBlocks: Block[] = [
         contactBlock,
         skillsHeaderBlock,
-        ...skillBlocks
+        ...skillBlocks,
       ];
 
       const rightBlocks: Block[] = [];
@@ -469,14 +603,20 @@ useEffect(() => {
       }
 
       // Split each column into pages independently
-      const splitColumnIntoPages = (blocks: Block[], startHeight: number = 0): PageContent[][] => {
+      const splitColumnIntoPages = (
+        blocks: Block[],
+        startHeight: number = 0
+      ): PageContent[][] => {
         const columnPages: PageContent[][] = [];
         let currentPage: PageContent[] = [];
         let currentHeight = startHeight;
         const PAGE_LIMIT = PAGE_HEIGHT - 80;
 
-        blocks.forEach(block => {
-          if (currentHeight + block.height > PAGE_LIMIT && currentPage.length > 0) {
+        blocks.forEach((block) => {
+          if (
+            currentHeight + block.height > PAGE_LIMIT &&
+            currentPage.length > 0
+          ) {
             // Start new page
             columnPages.push(currentPage);
             currentPage = [];
@@ -498,13 +638,16 @@ useEffect(() => {
       const rightColumnPages = splitColumnIntoPages(rightBlocks, 120);
 
       // Determine total number of pages needed
-      const totalPages = Math.max(leftColumnPages.length, rightColumnPages.length);
+      const totalPages = Math.max(
+        leftColumnPages.length,
+        rightColumnPages.length
+      );
 
       // Build final pages by combining left and right columns
       const pages: PageRow[][] = [];
       for (let i = 0; i < totalPages; i++) {
         const pageContent: PageRow[] = [];
-        
+
         // Add header only on first page
         if (i === 0) {
           pageContent.push(headerBlock.element);
@@ -517,10 +660,14 @@ useEffect(() => {
         pageContent.push(
           <div key={`page-${i}-columns`} className="flex gap-6">
             <div className="w-1/3 space-y-3">
-              {leftContent.map((el, idx) => <span key={`left-${i}-${idx}`}>{el}</span>)}
+              {leftContent.map((el, idx) => (
+                <span key={`left-${i}-${idx}`}>{el}</span>
+              ))}
             </div>
             <div className="w-2/3 space-y-3">
-              {rightContent.map((el, idx) => <span key={`right-${i}-${idx}`}>{el}</span>)}
+              {rightContent.map((el, idx) => (
+                <span key={`right-${i}-${idx}`}>{el}</span>
+              ))}
             </div>
           </div>
         );
@@ -534,28 +681,28 @@ useEffect(() => {
     splitIntoPages();
   }, [resume, handlePreviewClick]);
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+    <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Resume Editor</h1>
           <div className="flex gap-2">
             <button
-              onClick={() => setViewMode('edit')}
+              onClick={() => setViewMode("edit")}
               className={`px-4 py-2 rounded-lg flex items-center gap-2 transition ${
-                viewMode === 'edit'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                viewMode === "edit"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
               <Edit3 size={18} />
               Edit
             </button>
             <button
-              onClick={() => setViewMode('preview')}
+              onClick={() => setViewMode("preview")}
               className={`px-4 py-2 rounded-lg flex items-center gap-2 transition ${
-                viewMode === 'preview'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                viewMode === "preview"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
               <Eye size={18} />
@@ -565,79 +712,111 @@ useEffect(() => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {viewMode === 'edit' && (
-            <div ref={editPanelRef} className="bg-white rounded-xl shadow-lg p-6 space-y-6 max-h-[900px] overflow-y-auto">
-              
+          {viewMode === "edit" && (
+            <div
+              ref={editPanelRef}
+              className="bg-white rounded-xl shadow-lg p-6 space-y-6 max-h-[900px] overflow-y-auto"
+            >
               <div>
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  Personal Information
+                </h2>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Full Name
+                    </label>
                     <input
-                      ref={nameRef} 
+                      ref={nameRef}
                       type="text"
                       value={resume.name}
-                      onChange={(e) => setResume({...resume, name: e.target.value})}
+                      onChange={(e) =>
+                        setResume({ ...resume, name: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Position
+                    </label>
                     <input
-                      ref={positionRef} 
+                      ref={positionRef}
                       type="text"
                       value={resume.position}
-                      onChange={(e) => setResume({...resume, position: e.target.value})}
+                      onChange={(e) =>
+                        setResume({ ...resume, position: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email
+                    </label>
                     <input
-                      ref={emailRef} 
+                      ref={emailRef}
                       type="email"
                       value={resume.email}
-                      onChange={(e) => setResume({...resume, email: e.target.value})}
+                      onChange={(e) =>
+                        setResume({ ...resume, email: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone
+                    </label>
                     <input
-                      ref={phoneRef} 
+                      ref={phoneRef}
                       type="tel"
                       value={resume.phone}
-                      onChange={(e) => setResume({...resume, phone: e.target.value})}
+                      onChange={(e) =>
+                        setResume({ ...resume, phone: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Location
+                    </label>
                     <input
-                      ref={locationRef} 
+                      ref={locationRef}
                       type="text"
                       value={resume.location}
-                      onChange={(e) => setResume({...resume, location: e.target.value})}
+                      onChange={(e) =>
+                        setResume({ ...resume, location: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Portfolio/Website</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Portfolio/Website
+                    </label>
                     <input
-                      ref={portfolioRef} 
+                      ref={portfolioRef}
                       type="text"
                       value={resume.portfolio}
-                      onChange={(e) => setResume({...resume, portfolio: e.target.value})}
+                      onChange={(e) =>
+                        setResume({ ...resume, portfolio: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                   </div>
                   {/* Summary Input */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Professional Summary</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Professional Summary
+                    </label>
                     <textarea
-                      ref={summaryRef} 
+                      ref={summaryRef}
                       value={resume.summary}
-                      onChange={(e) => setResume({...resume, summary: e.target.value})}
+                      onChange={(e) =>
+                        setResume({ ...resume, summary: e.target.value })
+                      }
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
@@ -648,7 +827,9 @@ useEffect(() => {
               {/* Work Experience */}
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">Work Experience</h2>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Work Experience
+                  </h2>
                   <button
                     onClick={addExperience}
                     className="px-3 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-1 text-sm"
@@ -658,14 +839,15 @@ useEffect(() => {
                 </div>
                 {/* eslint-disable-next-line react-hooks/refs */}
                 {resume.experiences.map((exp) => (
-                  // Attach a ref to the container of the experience block
-                  <div 
-                    key={exp.id} 
-                    ref={getOrCreateRef(exp.id, experienceRefs)} 
+                  <div
+                    key={exp.id}
+                    ref={getOrCreateRef(exp.id, experienceRefs)}
                     className="mb-4 p-4 border border-gray-200 rounded-lg"
                   >
                     <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-semibold text-gray-900">Experience</h3>
+                      <h3 className="font-semibold text-gray-900">
+                        Experience
+                      </h3>
                       <button
                         onClick={() => removeExperience(exp.id)}
                         className="text-red-600 hover:text-red-700"
@@ -678,21 +860,27 @@ useEffect(() => {
                         type="text"
                         placeholder="Company Name"
                         value={exp.company}
-                        onChange={(e) => updateExperience(exp.id, 'company', e.target.value)}
+                        onChange={(e) =>
+                          updateExperience(exp.id, "company", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                       />
                       <input
                         type="text"
                         placeholder="Job Title"
                         value={exp.title}
-                        onChange={(e) => updateExperience(exp.id, 'title', e.target.value)}
+                        onChange={(e) =>
+                          updateExperience(exp.id, "title", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                       />
                       <input
                         type="text"
                         placeholder="Location"
                         value={exp.location}
-                        onChange={(e) => updateExperience(exp.id, 'location', e.target.value)}
+                        onChange={(e) =>
+                          updateExperience(exp.id, "location", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                       />
                       <div className="flex gap-2">
@@ -700,14 +888,22 @@ useEffect(() => {
                           type="text"
                           placeholder="Start Date"
                           value={exp.startDate}
-                          onChange={(e) => updateExperience(exp.id, 'startDate', e.target.value)}
+                          onChange={(e) =>
+                            updateExperience(
+                              exp.id,
+                              "startDate",
+                              e.target.value
+                            )
+                          }
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                         />
                         <input
                           type="text"
                           placeholder="End Date"
                           value={exp.endDate}
-                          onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)}
+                          onChange={(e) =>
+                            updateExperience(exp.id, "endDate", e.target.value)
+                          }
                           disabled={exp.current}
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm disabled:bg-gray-100"
                         />
@@ -716,7 +912,13 @@ useEffect(() => {
                         <input
                           type="checkbox"
                           checked={exp.current}
-                          onChange={(e) => updateExperience(exp.id, 'current', e.target.checked)}
+                          onChange={(e) =>
+                            updateExperience(
+                              exp.id,
+                              "current",
+                              e.target.checked
+                            )
+                          }
                           className="rounded"
                         />
                         Currently working here
@@ -724,7 +926,13 @@ useEffect(() => {
                       <textarea
                         placeholder="Description"
                         value={exp.description}
-                        onChange={(e) => updateExperience(exp.id, 'description', e.target.value)}
+                        onChange={(e) =>
+                          updateExperience(
+                            exp.id,
+                            "description",
+                            e.target.value
+                          )
+                        }
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                       />
@@ -747,9 +955,9 @@ useEffect(() => {
                 {/* eslint-disable-next-line react-hooks/refs */}
                 {resume.education.map((edu) => (
                   // Attach a ref to the container of the education block
-                  <div 
-                    key={edu.id} 
-                    ref={getOrCreateRef(edu.id, educationRefs)} 
+                  <div
+                    key={edu.id}
+                    ref={getOrCreateRef(edu.id, educationRefs)}
                     className="mb-4 p-4 border border-gray-200 rounded-lg"
                   >
                     <div className="flex justify-between items-start mb-3">
@@ -766,28 +974,36 @@ useEffect(() => {
                         type="text"
                         placeholder="Degree"
                         value={edu.degree}
-                        onChange={(e) => updateEducation(edu.id, 'degree', e.target.value)}
+                        onChange={(e) =>
+                          updateEducation(edu.id, "degree", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                       />
                       <input
                         type="text"
                         placeholder="Field of Study"
                         value={edu.field}
-                        onChange={(e) => updateEducation(edu.id, 'field', e.target.value)}
+                        onChange={(e) =>
+                          updateEducation(edu.id, "field", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                       />
                       <input
                         type="text"
                         placeholder="Institution"
                         value={edu.institution}
-                        onChange={(e) => updateEducation(edu.id, 'institution', e.target.value)}
+                        onChange={(e) =>
+                          updateEducation(edu.id, "institution", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                       />
                       <input
                         type="text"
                         placeholder="Location"
                         value={edu.location}
-                        onChange={(e) => updateEducation(edu.id, 'location', e.target.value)}
+                        onChange={(e) =>
+                          updateEducation(edu.id, "location", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                       />
                       <div className="flex gap-2">
@@ -795,14 +1011,18 @@ useEffect(() => {
                           type="text"
                           placeholder="Start Year"
                           value={edu.startDate}
-                          onChange={(e) => updateEducation(edu.id, 'startDate', e.target.value)}
+                          onChange={(e) =>
+                            updateEducation(edu.id, "startDate", e.target.value)
+                          }
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                         />
                         <input
                           type="text"
                           placeholder="End Year"
                           value={edu.endDate}
-                          onChange={(e) => updateEducation(edu.id, 'endDate', e.target.value)}
+                          onChange={(e) =>
+                            updateEducation(edu.id, "endDate", e.target.value)
+                          }
                           disabled={edu.current}
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm disabled:bg-gray-100"
                         />
@@ -811,7 +1031,9 @@ useEffect(() => {
                         <input
                           type="checkbox"
                           checked={edu.current}
-                          onChange={(e) => updateEducation(edu.id, 'current', e.target.checked)}
+                          onChange={(e) =>
+                            updateEducation(edu.id, "current", e.target.checked)
+                          }
                           className="rounded"
                         />
                         Currently studying
@@ -819,7 +1041,9 @@ useEffect(() => {
                       <textarea
                         placeholder="Description"
                         value={edu.description}
-                        onChange={(e) => updateEducation(edu.id, 'description', e.target.value)}
+                        onChange={(e) =>
+                          updateEducation(edu.id, "description", e.target.value)
+                        }
                         rows={2}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                       />
@@ -842,8 +1066,8 @@ useEffect(() => {
                 {/* eslint-disable-next-line react-hooks/refs */}
                 {resume.skills.map((skill) => (
                   // Attach a ref to the container of the skill block
-                  <div 
-                    key={skill.id} 
+                  <div
+                    key={skill.id}
                     ref={getOrCreateRef(skill.id, skillRefs)}
                     className="mb-3 p-3 border border-gray-200 rounded-lg flex gap-3 items-center"
                   >
@@ -851,12 +1075,16 @@ useEffect(() => {
                       type="text"
                       placeholder="Skill Name"
                       value={skill.name}
-                      onChange={(e) => updateSkill(skill.id, 'name', e.target.value)}
+                      onChange={(e) =>
+                        updateSkill(skill.id, "name", e.target.value)
+                      }
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                     />
                     <select
                       value={skill.level}
-                      onChange={(e) => updateSkill(skill.id, 'level', e.target.value)}
+                      onChange={(e) =>
+                        updateSkill(skill.id, "level", e.target.value)
+                      }
                       className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                     >
                       <option>Beginner</option>
@@ -876,13 +1104,13 @@ useEffect(() => {
             </div>
           )}
 
-          <div className={viewMode === 'preview' ? 'lg:col-span-2' : ''}>
+          <div className={viewMode === "preview" ? "lg:col-span-2" : ""}>
             <div className="space-y-4">
               {pageContents.map((page, pageIndex) => (
                 <div
                   key={pageIndex}
                   className="bg-white rounded-xl shadow-xl p-8"
-                  style={{ height: PAGE_HEIGHT, overflow: 'hidden' }}
+                  style={{ height: PAGE_HEIGHT, overflow: "hidden" }}
                 >
                   {page.map((content: PageRow, idx: number) => (
                     <div key={idx}>{content}</div>
