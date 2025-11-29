@@ -686,29 +686,25 @@ const ResumeEditor = () => {
     splitIntoPages();
   }, [resume, handlePreviewClick]);
 
-  
-  const [isDownloading,setIsDownloading]=useState(false);
-  
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const handleDownloadPDF = async () => {
     setIsDownloading(true);
     try {
       const filename = `${resume.name.replace(/\s/g, "_")}_Resume.pdf`;
-      
-      const blob = await pdf(
-        <ResumeDocument resume={resume} />
-      ).toBlob();
+
+      const blob = await pdf(<ResumeDocument resume={resume} />).toBlob();
 
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      
+
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       URL.revokeObjectURL(url);
-      
     } catch (error) {
       console.error("Error generating or downloading PDF:", error);
       // Optionally show a user-facing error message
@@ -717,46 +713,42 @@ const ResumeEditor = () => {
     }
   };
 
-
-
   return (
     <div className="md:p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 flex justify-between items-center">
-     <Link href={"/"}>
-     <Image
-        src="/images/logo-black.png"
-        width={150}
-        height={150}
-        alt="logo"
-      />
-      </Link>
+          <Link href={"/"}>
+            <Image
+              src="/images/logo-black.png"
+              width={150}
+              height={150}
+              alt="logo"
+            />
+          </Link>
           <div className="flex gap-2">
             <div className="bg-white rounded-full p-1 flex">
-            <button
-              onClick={() => setViewMode("edit")}
-              className={`px-3 py-2 cursor-pointer rounded-full flex items-center gap-2 transition ${
-                viewMode === "edit"
-                  ? "bg-orange-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              <Edit3 size={18} />
-              
-            </button>
-            <button
-              onClick={() => setViewMode("preview")}
-              className={`px-3 py-2 cursor-pointer rounded-full flex items-center gap-2 transition ${
-                viewMode === "preview"
-                  ? "bg-orange-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              <Eye size={18} />
-              
-            </button>
+              <button
+                onClick={() => setViewMode("edit")}
+                className={`px-3 py-2 cursor-pointer rounded-full flex items-center gap-2 transition ${
+                  viewMode === "edit"
+                    ? "bg-orange-600 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                <Edit3 size={18} />
+              </button>
+              <button
+                onClick={() => setViewMode("preview")}
+                className={`px-3 py-2 cursor-pointer rounded-full flex items-center gap-2 transition ${
+                  viewMode === "preview"
+                    ? "bg-orange-600 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                <Eye size={18} />
+              </button>
             </div>
-           <button
+            <button
               onClick={handleDownloadPDF}
               className="px-4 py-2 rounded-lg flex items-center gap-2 transition bg-white text-orange-600 hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
               disabled={isDownloading}
