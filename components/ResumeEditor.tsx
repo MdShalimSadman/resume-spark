@@ -18,8 +18,11 @@ import {
   Trash2,
   Eye,
   Edit3,
+  Download,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
+import { ResumeDocument } from "./ResumeDocument";
+import { pdf, PDFDownloadLink } from "@react-pdf/renderer";
 
 interface Experience {
   id: string;
@@ -680,6 +683,40 @@ const ResumeEditor = () => {
 
     splitIntoPages();
   }, [resume, handlePreviewClick]);
+
+  
+  const [isDownloading,setIsDownloading]=useState(false);
+  
+  const handleDownloadPDF = async () => {
+    setIsDownloading(true);
+    try {
+      const filename = `${resume.name.replace(/\s/g, "_")}_Resume.pdf`;
+      
+      const blob = await pdf(
+        <ResumeDocument resume={resume} />
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error("Error generating or downloading PDF:", error);
+      // Optionally show a user-facing error message
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+
+
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
@@ -696,6 +733,14 @@ const ResumeEditor = () => {
             >
               <Edit3 size={18} />
               Edit
+            </button>
+           <button
+              onClick={handleDownloadPDF}
+              className="px-4 py-2 rounded-lg flex items-center gap-2 transition bg-green-600 text-white hover:bg-green-700 disabled:bg-green-400"
+              disabled={isDownloading}
+            >
+              <Download size={18} />
+              {isDownloading ? "Generating..." : "Download PDF"}
             </button>
             <button
               onClick={() => setViewMode("preview")}
