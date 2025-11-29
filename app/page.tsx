@@ -94,13 +94,12 @@ const Page = () => {
 
       <TypingText />
 
-     <h3 className="mt-18 text-2xl font-semibold text-gray-600">Popular templates</h3>
+      <h3 className="mt-18 text-2xl font-semibold text-gray-600">
+        Popular templates
+      </h3>
       <div className="mt-10 flex gap-7 items-center justify-center">
         {templates.map((t) => (
-          <div
-            key={t.id}
-            className="relative w-40 h-52 rounded-xl shadow-xl "
-          >
+          <div key={t.id} className="relative w-40 h-52 rounded-xl shadow-xl ">
             {t.comingSoon && (
               <span className="absolute -top-4 -right-4 z-50 bg-linear-to-r from-[#FE9415] to-[#FA332B] text-white text-xs px-2 py-0.5 rounded-full">
                 Coming Soon
