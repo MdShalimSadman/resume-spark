@@ -1,11 +1,9 @@
 "use client"
 
-import { useState, useEffect, useRef, useMemo, useCallback, ReactElement, ReactNode } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, ReactElement, ReactNode, createRef } from 'react';
 import { Mail, Phone, MapPin, Globe, Plus, Trash2, Eye, Edit3 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { JSX } from 'react/jsx-runtime';
 
-// --- Interface Definitions (Kept from original code) ---
 interface Experience {
   id: string;
   company: string;
@@ -118,7 +116,6 @@ const ResumeEditor = () => {
 
   const [pageContents, setPageContents] = useState<PageRow[][]>([]);
 
-  // 1. Static Refs for Personal Information and the Edit Panel Container
   const editPanelRef = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const positionRef = useRef<HTMLInputElement>(null);
@@ -128,20 +125,25 @@ const ResumeEditor = () => {
   const portfolioRef = useRef<HTMLInputElement>(null);
   const summaryRef = useRef<HTMLTextAreaElement>(null);
 
-  // 2. Dynamic Refs for collections (using HTMLDivElement for section containers)
+
   const experienceRefs = useRef(createRefMap()).current;
   const educationRefs = useRef(createRefMap()).current;
   const skillRefs = useRef(createRefMap()).current;
 
-  // Function to ensure a ref object exists for a given ID and map
-  const getOrCreateRef = useCallback((id: string, refMap: Map<string, React.RefObject<HTMLDivElement>>) => {
+
+const getOrCreateRef = useCallback(
+  (
+    id: string,
+    refMap: Map<string, React.RefObject<HTMLDivElement | null>>
+  ) => {
     if (!refMap.has(id)) {
-      refMap.set(id, { current: null });
+      refMap.set(id, createRef<HTMLDivElement>());
     }
     return refMap.get(id)!;
-  }, []);
+  },
+  []
+);
 
-  // 3. onPreviewClick Handler
   const handlePreviewClick = useCallback((refKey: string, type: 'basic' | 'experience' | 'education' | 'skill', id?: string) => {
     setViewMode('edit');
 
@@ -172,17 +174,15 @@ const ResumeEditor = () => {
     }
 
     if (editPanelRef.current) {
-        // Scroll the edit panel container to the top first
         editPanelRef.current.scrollTop = 0; 
     }
 
-    // Use a slight delay to ensure the DOM has re-rendered in 'edit' mode before scrolling
+
     setTimeout(() => {
       if (targetRef?.current) {
-        // Scroll the target element into view within the scrollable edit panel
+
         targetRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        
-        // Optional: Focus the input/textarea if applicable (for basic fields)
+
         if (refKey !== 'experience' && refKey !== 'education' && refKey !== 'skill' && targetRef.current.focus) {
           targetRef.current.focus();
         }
@@ -191,7 +191,7 @@ const ResumeEditor = () => {
   }, [experienceRefs, educationRefs, skillRefs]);
 
 
-  // --- Resume Data Management Functions (Unchanged) ---
+
 
   const addExperience = () => {
     setResume(prev => ({
@@ -286,21 +286,11 @@ const ResumeEditor = () => {
 
   // --- Page Splitting Logic (Used for Preview) ---
 
-  useEffect(() => {
+useEffect(() => {
     const splitIntoPages = () => {
-      const pages: PageRow[][] = [];
-      let currentPage: PageContent[] = [];
-      let leftColumn: PageContent[] = [];
-      let rightColumn: PageContent[] = [];
-      let leftColumnHeight = 0;
-      let rightColumnHeight = 0;
-      let isFirstPage = true;
-
-      // Ensure a block is clickable and updates viewMode/scrolls to target
       const clickableWrapper = (element: ReactElement, refKey: string, type: 'basic' | 'experience' | 'education' | 'skill', id?: string) => {
         return (
           <div 
-            // Use cloneElement to add props to the root element of the block content
             {...element.props} 
             className={`${element.props.className || ''} cursor-pointer hover:bg-gray-100 p-1 rounded transition-colors`}
             onClick={() => handlePreviewClick(refKey, type, id)}
@@ -460,98 +450,89 @@ const ResumeEditor = () => {
         isRightColumn: true
       }));
 
-      const renderContentRow = (left: PageContent[], right: PageContent[], key: string): PageRow => (
-        <div key={key} className="flex gap-6">
-          <div className="w-1/3 space-y-3">
-            {left.map((el, i) => <span key={`left-${key}-${i}`}>{el}</span>)}
-          </div>
-          <div className="w-2/3 space-y-3">
-            {right.map((el, i) => <span key={`right-${key}-${i}`}>{el}</span>)}
-          </div>
-        </div>
-      );
+      // Collect all left and right column blocks
+      const leftBlocks: Block[] = [
+        contactBlock,
+        skillsHeaderBlock,
+        ...skillBlocks
+      ];
 
-      const finishPage = () => {
-        if (leftColumn.length > 0 || rightColumn.length > 0) {
-          pages.push([...currentPage, renderContentRow(leftColumn, rightColumn, `content-row-${pages.length}-${currentPage.length}`)]);
-        } else if (currentPage.length > 0) {
-          pages.push([...currentPage]);
-        }
-        currentPage = [];
-        leftColumn = [];
-        rightColumn = [];
-        leftColumnHeight = 0;
-        rightColumnHeight = 0;
-        isFirstPage = false;
-      };
-
-      const addBlock = (block: Block | null) => {
-        if (!block) return;
-
-        const { element, height, isLeftColumn, isRightColumn } = block;
-
-        const PAGE_LIMIT = PAGE_HEIGHT - 120; 
-
-        const doesLeftColumnOverflow = isLeftColumn && leftColumnHeight + height > PAGE_LIMIT;
-        const doesRightColumnOverflow = isRightColumn && rightColumnHeight + height > PAGE_LIMIT;
-
-        if (doesLeftColumnOverflow || doesRightColumnOverflow) {
-          if (leftColumn.length > 0 || rightColumn.length > 0) {
-            currentPage.push(renderContentRow(leftColumn, rightColumn, `content-row-${pages.length}-${currentPage.length}`));
-          }
-          finishPage(); // Start a new page
-          
-          if (isLeftColumn) {
-            leftColumn.push(element);
-            leftColumnHeight = height;
-            rightColumnHeight = 0;
-          } else if (isRightColumn) {
-            rightColumn.push(element);
-            rightColumnHeight = height;
-            leftColumnHeight = 0;
-          }
-        } else {
-          if (isLeftColumn) {
-            leftColumn.push(element);
-            leftColumnHeight += height;
-          } else if (isRightColumn) {
-            rightColumn.push(element);
-            rightColumnHeight += height;
-          } else {
-            // Full width block (Header)
-            currentPage.push(element);
-          }
-        }
-      };
-
-      if (isFirstPage) {
-        addBlock(headerBlock);
-      }
-
-      addBlock(contactBlock);
-      addBlock(skillsHeaderBlock);
-      skillBlocks.forEach(block => addBlock(block));
-
-      if (summaryBlock) addBlock(summaryBlock);
+      const rightBlocks: Block[] = [];
+      if (summaryBlock) rightBlocks.push(summaryBlock);
       if (resume.experiences.length > 0) {
-        addBlock(experienceHeaderBlock);
-        experienceBlocks.forEach(block => addBlock(block));
+        rightBlocks.push(experienceHeaderBlock);
+        rightBlocks.push(...experienceBlocks);
       }
       if (resume.education.length > 0) {
-        addBlock(educationHeaderBlock);
-        educationBlocks.forEach(block => addBlock(block));
+        rightBlocks.push(educationHeaderBlock);
+        rightBlocks.push(...educationBlocks);
       }
 
-      finishPage();
+      // Split each column into pages independently
+      const splitColumnIntoPages = (blocks: Block[], startHeight: number = 0): PageContent[][] => {
+        const columnPages: PageContent[][] = [];
+        let currentPage: PageContent[] = [];
+        let currentHeight = startHeight;
+        const PAGE_LIMIT = PAGE_HEIGHT - 80;
+
+        blocks.forEach(block => {
+          if (currentHeight + block.height > PAGE_LIMIT && currentPage.length > 0) {
+            // Start new page
+            columnPages.push(currentPage);
+            currentPage = [];
+            currentHeight = 0;
+          }
+          currentPage.push(block.element);
+          currentHeight += block.height;
+        });
+
+        if (currentPage.length > 0) {
+          columnPages.push(currentPage);
+        }
+
+        return columnPages;
+      };
+
+      // Split columns independently
+      const leftColumnPages = splitColumnIntoPages(leftBlocks, 120); // Account for header on first page
+      const rightColumnPages = splitColumnIntoPages(rightBlocks, 120);
+
+      // Determine total number of pages needed
+      const totalPages = Math.max(leftColumnPages.length, rightColumnPages.length);
+
+      // Build final pages by combining left and right columns
+      const pages: PageRow[][] = [];
+      for (let i = 0; i < totalPages; i++) {
+        const pageContent: PageRow[] = [];
+        
+        // Add header only on first page
+        if (i === 0) {
+          pageContent.push(headerBlock.element);
+        }
+
+        // Create the two-column row
+        const leftContent = leftColumnPages[i] || [];
+        const rightContent = rightColumnPages[i] || [];
+
+        pageContent.push(
+          <div key={`page-${i}-columns`} className="flex gap-6">
+            <div className="w-1/3 space-y-3">
+              {leftContent.map((el, idx) => <span key={`left-${i}-${idx}`}>{el}</span>)}
+            </div>
+            <div className="w-2/3 space-y-3">
+              {rightContent.map((el, idx) => <span key={`right-${i}-${idx}`}>{el}</span>)}
+            </div>
+          </div>
+        );
+
+        pages.push(pageContent);
+      }
 
       setPageContents(pages);
     };
 
     splitIntoPages();
   }, [resume, handlePreviewClick]);
-  
-  // --- Render (Refactored to attach dynamic refs) ---
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
       <div className="max-w-7xl mx-auto">
@@ -585,14 +566,11 @@ const ResumeEditor = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {viewMode === 'edit' && (
-            // Attach ref to the edit panel wrapper for scroll control
             <div ref={editPanelRef} className="bg-white rounded-xl shadow-lg p-6 space-y-6 max-h-[900px] overflow-y-auto">
               
-              {/* Personal Information */}
               <div>
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h2>
                 <div className="space-y-4">
-                  {/* Name Input */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                     <input
@@ -603,7 +581,6 @@ const ResumeEditor = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                   </div>
-                  {/* Position Input */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
                     <input
@@ -614,7 +591,6 @@ const ResumeEditor = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                   </div>
-                  {/* Contact Inputs */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <input
@@ -680,6 +656,7 @@ const ResumeEditor = () => {
                     <Plus size={16} /> Add
                   </button>
                 </div>
+                {/* eslint-disable-next-line react-hooks/refs */}
                 {resume.experiences.map((exp) => (
                   // Attach a ref to the container of the experience block
                   <div 
@@ -767,6 +744,7 @@ const ResumeEditor = () => {
                     <Plus size={16} /> Add
                   </button>
                 </div>
+                {/* eslint-disable-next-line react-hooks/refs */}
                 {resume.education.map((edu) => (
                   // Attach a ref to the container of the education block
                   <div 
@@ -861,6 +839,7 @@ const ResumeEditor = () => {
                     <Plus size={16} /> Add
                   </button>
                 </div>
+                {/* eslint-disable-next-line react-hooks/refs */}
                 {resume.skills.map((skill) => (
                   // Attach a ref to the container of the skill block
                   <div 
