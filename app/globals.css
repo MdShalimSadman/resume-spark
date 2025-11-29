@@ -3,3 +3,32 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+*::-webkit-scrollbar {
+  width: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background:#F99C17;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #F99C17;
+  border-radius: 4px;
+}
+
+::-moz-selection {
+  /* Code for Firefox */
+  color: white;
+  background: #F99C17;
+}
+
+::selection {
+  color: white;
+  background: #F99C17;
+}

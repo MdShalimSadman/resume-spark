@@ -53,10 +53,7 @@ const TypingText = () => {
 
 const Page = () => {
   return (
-    <div className="relative min-h-screen p-12 w-full flex flex-col items-center overflow-hidden">
-      <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-[#FE9415] rounded-full blur-[140px] opacity-40 z-[-1] animate-pulse" />
-      <div className="absolute bottom-0 left-0 w-[350px] h-[350px] bg-[#FA332B] rounded-full blur-[140px] opacity-35 z-[-1] animate-pulse" />
-
+    <div className="min-h-full p-12 w-full flex flex-col items-center overflow-hidden">
       <Image
         src="/images/logo-black.png"
         width={250}

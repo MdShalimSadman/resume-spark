@@ -22,7 +22,9 @@ import {
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import { ResumeDocument } from "./ResumeDocument";
-import { pdf, PDFDownloadLink } from "@react-pdf/renderer";
+import { pdf } from "@react-pdf/renderer";
+import Image from "next/image";
+import Link from "next/link";
 
 interface Experience {
   id: string;
@@ -718,40 +720,49 @@ const ResumeEditor = () => {
 
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="md:p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">Resume Editor</h1>
+     <Link href={"/"}>
+     <Image
+        src="/images/logo-black.png"
+        width={150}
+        height={150}
+        alt="logo"
+      />
+      </Link>
           <div className="flex gap-2">
+            <div className="bg-white rounded-full p-1 flex">
             <button
               onClick={() => setViewMode("edit")}
-              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition ${
+              className={`px-3 py-2 cursor-pointer rounded-full flex items-center gap-2 transition ${
                 viewMode === "edit"
-                  ? "bg-indigo-600 text-white"
+                  ? "bg-orange-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
               <Edit3 size={18} />
-              Edit
-            </button>
-           <button
-              onClick={handleDownloadPDF}
-              className="px-4 py-2 rounded-lg flex items-center gap-2 transition bg-green-600 text-white hover:bg-green-700 disabled:bg-green-400"
-              disabled={isDownloading}
-            >
-              <Download size={18} />
-              {isDownloading ? "Generating..." : "Download PDF"}
+              
             </button>
             <button
               onClick={() => setViewMode("preview")}
-              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition ${
+              className={`px-3 py-2 cursor-pointer rounded-full flex items-center gap-2 transition ${
                 viewMode === "preview"
-                  ? "bg-indigo-600 text-white"
+                  ? "bg-orange-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
               <Eye size={18} />
-              Preview
+              
+            </button>
+            </div>
+           <button
+              onClick={handleDownloadPDF}
+              className="px-4 py-2 rounded-lg flex items-center gap-2 transition bg-white text-orange-600 hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
+              disabled={isDownloading}
+            >
+              <Download size={18} />
+              {isDownloading ? "Generating..." : "Download "}
             </button>
           </div>
         </div>
@@ -877,7 +888,7 @@ const ResumeEditor = () => {
                   </h2>
                   <button
                     onClick={addExperience}
-                    className="px-3 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-1 text-sm"
+                    className="px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-1 text-sm"
                   >
                     <Plus size={16} /> Add
                   </button>
@@ -992,7 +1003,7 @@ const ResumeEditor = () => {
                   <h2 className="text-xl font-bold text-gray-900">Education</h2>
                   <button
                     onClick={addEducation}
-                    className="px-3 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-1 text-sm"
+                    className="px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-1 text-sm"
                   >
                     <Plus size={16} /> Add
                   </button>
@@ -1103,7 +1114,7 @@ const ResumeEditor = () => {
                   <h2 className="text-xl font-bold text-gray-900">Skills</h2>
                   <button
                     onClick={addSkill}
-                    className="px-3 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-1 text-sm"
+                    className="px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-1 text-sm"
                   >
                     <Plus size={16} /> Add
                   </button>
@@ -1150,7 +1161,7 @@ const ResumeEditor = () => {
           )}
 
           <div className={viewMode === "preview" ? "lg:col-span-2" : ""}>
-            <div className="space-y-4">
+            <div className="space-y-4 shadow-lg overflow-auto">
               {pageContents.map((page, pageIndex) => (
                 <div
                   key={pageIndex}
