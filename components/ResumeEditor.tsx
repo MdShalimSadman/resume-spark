@@ -713,6 +713,75 @@ const ResumeEditor = () => {
     }
   };
 
+
+  const [atsResult, setAtsResult] = useState<string | null>(null);
+const [checkingATS, setCheckingATS] = useState(false);
+
+
+const formatResumeForAI = (resume: ResumeData) => {
+  return `
+Name: ${resume.name}
+Position: ${resume.position}
+Email: ${resume.email}
+Phone: ${resume.phone}
+Location: ${resume.location}
+Portfolio: ${resume.portfolio}
+
+Summary:
+${resume.summary}
+
+Work Experience:
+${resume.experiences
+  .map(
+    (exp) => `
+Company: ${exp.company}
+Title: ${exp.title}
+Location: ${exp.location}
+Date: ${exp.startDate} - ${exp.current ? "Present" : exp.endDate}
+Description: ${exp.description}
+`
+  )
+  .join("\n")}
+
+Education:
+${resume.education
+  .map(
+    (edu) => `
+Degree: ${edu.degree} in ${edu.field}
+Institution: ${edu.institution}
+Location: ${edu.location}
+Date: ${edu.startDate} - ${edu.current ? "Present" : edu.endDate}
+Description: ${edu.description}
+`
+  )
+  .join("\n")}
+
+Skills:
+${resume.skills.map((s) => `${s.name} (${s.level})`).join(", ")}
+  `;
+};
+
+const handleCheckATS = async () => {
+  setCheckingATS(true);
+  try {
+    const formattedResume = formatResumeForAI(resume);
+
+    const response = await fetch("/api/ats-check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ resume: formattedResume }),
+    });
+
+    const data = await response.json();
+    setAtsResult(data.result);
+  } catch (err) {
+    console.error(err);
+    setAtsResult("Error analyzing ATS score.");
+  }
+  setCheckingATS(false);
+};
+
+
   return (
     <div className="md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -756,8 +825,23 @@ const ResumeEditor = () => {
               <Download size={18} />
               {isDownloading ? "Generating..." : "Download "}
             </button>
+            <button
+  onClick={handleCheckATS}
+  className="px-4 py-2 rounded-lg flex items-center gap-2 transition bg-blue-600 text-white hover:bg-blue-700"
+>
+  Check ATS Score
+</button>
+
           </div>
         </div>
+{atsResult && (
+  <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-600 rounded">
+    <h3 className="font-bold text-blue-800 mb-2">ATS Analysis Result</h3>
+    <pre className="whitespace-pre-wrap text-sm text-gray-800">
+      {atsResult}
+    </pre>
+  </div>
+)}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {viewMode === "edit" && (
