@@ -19,12 +19,16 @@ import {
   Eye,
   Edit3,
   Download,
+  Bot,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import { ResumeDocument } from "./ResumeDocument";
 import { pdf } from "@react-pdf/renderer";
 import Image from "next/image";
 import Link from "next/link";
+import { useSetAtom } from "jotai";
+import { atsReportAtom, atsLoadingAtom, AtsReportData } from "@/atoms/atsAtom";
+import { useRouter } from "next/navigation";
 
 interface Experience {
   id: string;
@@ -80,7 +84,6 @@ type PageRow = ReactElement;
 
 const PAGE_HEIGHT = 1000;
 
-// Helper to create a ref map for dynamic elements
 const createRefMap = () => new Map<string, React.RefObject<HTMLDivElement>>();
 
 const ResumeEditor = () => {
@@ -141,7 +144,7 @@ const ResumeEditor = () => {
   });
 
   const [pageContents, setPageContents] = useState<PageRow[][]>([]);
-
+  const router = useRouter();
   const editPanelRef = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const positionRef = useRef<HTMLInputElement>(null);
@@ -222,8 +225,6 @@ const ResumeEditor = () => {
 
           element.scrollIntoView({ behavior: "smooth", block: "start" });
 
-          // FIX 2: Use a type assertion (e.g., to HTMLInputElement) to explicitly define the type
-          // before calling .focus(), satisfying noImplicitAny. We also check if focus is a function.
           if (
             refKey !== "experience" &&
             refKey !== "education" &&
@@ -271,7 +272,6 @@ const ResumeEditor = () => {
 
   const removeExperience = (id: string) => {
     setResume((prev) => {
-      // Clean up the ref when removing the item
       experienceRefs.delete(id);
       return {
         ...prev,
@@ -315,7 +315,6 @@ const ResumeEditor = () => {
 
   const removeEducation = (id: string) => {
     setResume((prev) => {
-      // Clean up the ref when removing the item
       educationRefs.delete(id);
       return {
         ...prev,
@@ -353,7 +352,6 @@ const ResumeEditor = () => {
 
   const removeSkill = (id: string) => {
     setResume((prev) => {
-      // Clean up the ref when removing the item
       skillRefs.delete(id);
       return {
         ...prev,
@@ -372,8 +370,6 @@ const ResumeEditor = () => {
       ),
     }));
   };
-
-  // --- Page Splitting Logic (Used for Preview) ---
 
   useEffect(() => {
     const splitIntoPages = () => {
@@ -713,13 +709,12 @@ const ResumeEditor = () => {
     }
   };
 
+  const setAtsReport = useSetAtom(atsReportAtom);
+  const setLoading = useSetAtom(atsLoadingAtom);
+  const [isAtsLoading, setIsAtsLoading] = useState(false);
 
-  const [atsResult, setAtsResult] = useState<string | null>(null);
-const [checkingATS, setCheckingATS] = useState(false);
-
-
-const formatResumeForAI = (resume: ResumeData) => {
-  return `
+  const formatResumeForAI = (resume: ResumeData) => {
+    return `
 Name: ${resume.name}
 Position: ${resume.position}
 Email: ${resume.email}
@@ -759,28 +754,54 @@ Description: ${edu.description}
 Skills:
 ${resume.skills.map((s) => `${s.name} (${s.level})`).join(", ")}
   `;
-};
+  };
 
-const handleCheckATS = async () => {
-  setCheckingATS(true);
-  try {
-    const formattedResume = formatResumeForAI(resume);
+  const handleCheckATS = async () => {
+    
+    setIsAtsLoading(true);
+    setLoading(true);
+    setAtsReport(null);
 
-    const response = await fetch("/api/ats-check", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ resume: formattedResume }),
-    });
+    try {
+      const formattedResume = formatResumeForAI(resume);
 
-    const data = await response.json();
-    setAtsResult(data.result);
-  } catch (err) {
-    console.error(err);
-    setAtsResult("Error analyzing ATS score.");
-  }
-  setCheckingATS(false);
-};
+      const response = await fetch("/api/ats-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resume: formattedResume }),
+      });
 
+      const data = await response.json();
+
+      let finalReport: AtsReportData | null = null;
+
+      if (response.ok && data.result) {
+        if (typeof data.result === "string") {
+          // FIX APPLIED: Attempt second parse if the server returned a string
+          try {
+            finalReport = JSON.parse(data.result);
+          } catch (e) {
+            console.error("Failed to parse inner JSON string:", e);
+          }
+        } else {
+          // Assume it's already the parsed object
+          finalReport = data.result;
+        }
+
+        if (finalReport) {
+          setAtsReport(finalReport as AtsReportData);
+          router.push("/ats-report"); 
+        }
+      } else {
+        console.error("API Error:", data.error || "Failed to analyze resume.");
+      }
+    } catch (err) {
+      console.error("Network or Parsing Error:", err);
+    } finally {
+      setLoading(false);
+      setIsAtsLoading(false);
+    }
+  };
 
   return (
     <div className="md:p-8">
@@ -795,7 +816,7 @@ const handleCheckATS = async () => {
             />
           </Link>
           <div className="flex gap-2">
-            <div className="bg-white rounded-full p-1 flex">
+            <div className="bg-white shadow-sm rounded-full p-1 flex">
               <button
                 onClick={() => setViewMode("edit")}
                 className={`px-3 py-2 cursor-pointer rounded-full flex items-center gap-2 transition ${
@@ -819,29 +840,22 @@ const handleCheckATS = async () => {
             </div>
             <button
               onClick={handleDownloadPDF}
-              className="px-4 py-2 rounded-lg flex items-center gap-2 transition bg-white text-orange-600 hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
+              className="px-4 shadow-sm py-2 rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
               disabled={isDownloading}
             >
               <Download size={18} />
               {isDownloading ? "Generating..." : "Download "}
             </button>
             <button
-  onClick={handleCheckATS}
-  className="px-4 py-2 rounded-lg flex items-center gap-2 transition bg-blue-600 text-white hover:bg-blue-700"
->
-  Check ATS Score
-</button>
-
+              onClick={handleCheckATS}
+              disabled={isAtsLoading}
+               className="px-4 py-2 shadow-sm rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
+            >
+              <Bot size={18}/>
+              {isAtsLoading? "AI is thinking..":"Check ATS Score & AI Feedback"}
+            </button>
           </div>
         </div>
-{atsResult && (
-  <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-600 rounded">
-    <h3 className="font-bold text-blue-800 mb-2">ATS Analysis Result</h3>
-    <pre className="whitespace-pre-wrap text-sm text-gray-800">
-      {atsResult}
-    </pre>
-  </div>
-)}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {viewMode === "edit" && (

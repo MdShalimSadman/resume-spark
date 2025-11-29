@@ -13,8 +13,7 @@ export async function POST(req: Request) {
 You are an expert ATS (Applicant Tracking System) analyzer.
 Evaluate the resume below against typical ATS parsing rules and current job market standards for the target role (Senior Software Engineer).
 
-Resume:
-${resume}
+Resume:${resume}
 
 You MUST generate a JSON object with the following structure. Do not include any text outside the JSON object.
 
@@ -30,13 +29,16 @@ JSON Structure:
     `;
 
     const completion = await client.chat.completions.create({
-      model: "gpt-5-nano", // I recommend using a standard model like gpt-4-turbo or gpt-3.5-turbo
+      model: "gpt-5-nano",
       messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
     });
 
-    const result = completion.choices[0].message.content;
+    const jsonStringResult = completion.choices[0].message.content;
 
-    return NextResponse.json({ result }, { status: 200 });
+    const structuredResult = JSON.parse(jsonStringResult || "{}");
+
+    return NextResponse.json({ result: structuredResult }, { status: 200 });
   } catch (error) {
     console.error("ATS CHECK ERROR:", error);
     return NextResponse.json(
