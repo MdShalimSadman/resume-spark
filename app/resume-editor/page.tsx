@@ -1,9 +1,9 @@
-import ResumeEditor from "@/components/resume-editor/ResumeEditor"
+import ResumeEditorIndex from "@/components/resume-editor"
 
 const Page = () => {
   return (
     <div>
-      <ResumeEditor/>
+     <ResumeEditorIndex/>
     </div>
   )
 }

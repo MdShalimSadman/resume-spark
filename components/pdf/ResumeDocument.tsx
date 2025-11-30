@@ -51,7 +51,6 @@ interface ResumeData {
   education: Education[];
   skills: Skill[];
 }
-// --------------------------------------------------------------------------------------
 
 const styles = StyleSheet.create({
   page: {

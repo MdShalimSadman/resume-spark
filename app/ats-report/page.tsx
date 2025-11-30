@@ -3,7 +3,7 @@
 import { useAtomValue } from "jotai";
 import { atsReportAtom, atsLoadingAtom } from "@/atoms/atsAtom";
 import Image from "next/image";
-import AnimatedScoreCircle from "@/components/AnimatedScoreCircle";
+import AnimatedScoreCircle from "@/components/icons/AnimatedScoreCircle";
 import { FC } from "react";
 
 const ReportSection: FC<{

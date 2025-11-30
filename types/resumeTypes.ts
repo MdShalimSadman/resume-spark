@@ -1,7 +1,7 @@
-// types.ts
-import { ReactElement, ReactNode } from "react";
 
-export interface Experience {
+import { ReactElement } from "react";
+
+export interface IExperience {
   id: string;
   company: string;
   title: string;
@@ -12,7 +12,7 @@ export interface Experience {
   description: string;
 }
 
-export interface Education {
+export interface IEducation {
   id: string;
   degree: string;
   field: string;
@@ -24,13 +24,13 @@ export interface Education {
   description: string;
 }
 
-export interface Skill {
+export interface ISkill {
   id: string;
   name: string;
   level: "Beginner" | "Intermediate" | "Advanced" | "Expert";
 }
 
-export interface ResumeData {
+export interface IResumeData {
   name: string;
   position: string;
   email: string;
@@ -38,12 +38,12 @@ export interface ResumeData {
   location: string;
   portfolio: string;
   summary: string;
-  experiences: Experience[];
-  education: Education[];
-  skills: Skill[];
+  experiences: IExperience[];
+  education: IEducation[];
+  skills: ISkill[];
 }
 
-export interface Block {
+export interface IBlock {
   element: ReactElement;
   height: number;
   isLeftColumn?: boolean;

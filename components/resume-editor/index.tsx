@@ -1,4 +1,3 @@
-// ResumeEditor.tsx
 "use client";
 
 import {
@@ -10,98 +9,39 @@ import {
   ReactNode,
   createRef,
 } from "react";
-import {
-  Mail,
-  Phone,
-  MapPin,
-  Globe,
-  Eye,
-  Edit3,
-  Download,
-  Bot,
-} from "lucide-react";
+import { Mail, Phone, MapPin, Globe } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-import { ResumeDocument } from "../ResumeDocument";
-import { pdf } from "@react-pdf/renderer";
-import Image from "next/image";
-import Link from "next/link";
 import { useSetAtom } from "jotai";
 import { atsReportAtom, atsLoadingAtom, AtsReportData } from "@/atoms/atsAtom";
 import { useRouter } from "next/navigation";
 
-import EditorPanel from "./EditorPanel";
-import PreviewPanel from "./PreviewPanel";
+import EditorPanel from "./sections/EditorPanel";
+import PreviewPanel from "./sections/PreviewPanel";
 import {
-  Experience,
-  Education,
-  Skill,
-  ResumeData,
-  Block,
+  IExperience,
+  IEducation,
+  ISkill,
+  IResumeData,
+  IBlock,
   PageContent,
   PageRow,
   PAGE_HEIGHT,
   createRefMap,
-} from "./types";
+} from "../../types/resumeTypes";
+import ResumeHeader from "./sections/ResumeHeader";
+import { initialResume } from "@/data/resumeData";
+import { formatResumeForAI } from "@/utils/formatResumeForAi";
+import DownloadPDF from "./sections/DownloadPdf";
 
-const ResumeEditor = () => {
+const ResumeEditorIndex = () => {
   const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
-  const [resume, setResume] = useState<ResumeData>({
-    name: "John Doe",
-    position: "Senior Software Engineer",
-    email: "john.doe@email.com",
-    phone: "+1 (555) 123-4567",
-    location: "San Francisco, CA",
-    portfolio: "www.johndoe.dev",
-    summary:
-      "Experienced software engineer with 8+ years of expertise in full-stack development, specializing in React, Node.js, and cloud technologies.",
-    experiences: [
-      {
-        id: uuidv4(),
-        company: "Tech Corp Inc.",
-        title: "Senior Software Engineer",
-        location: "San Francisco, CA",
-        startDate: "Jan 2020",
-        endDate: "Present",
-        current: true,
-        description:
-          "Led development of microservices architecture serving 2M+ users. Implemented CI/CD pipelines reducing deployment time by 60%.",
-      },
-      {
-        id: uuidv4(),
-        company: "StartUp Labs",
-        title: "Full Stack Developer",
-        location: "Austin, TX",
-        startDate: "Jun 2017",
-        endDate: "Dec 2019",
-        current: false,
-        description:
-          "Built scalable web applications using React and Node.js. Collaborated with cross-functional teams to deliver features on time.",
-      },
-    ],
-    education: [
-      {
-        id: uuidv4(),
-        degree: "Bachelor of Science",
-        field: "Computer Science",
-        institution: "Stanford University",
-        location: "Stanford, CA",
-        startDate: "2013",
-        endDate: "2017",
-        current: false,
-        description:
-          "GPA: 3.8/4.0. Focus on algorithms, data structures, and software engineering.",
-      },
-    ],
-    skills: [
-      { id: uuidv4(), name: "JavaScript/TypeScript", level: "Expert" },
-      { id: uuidv4(), name: "React & Next.js", level: "Expert" },
-      { id: uuidv4(), name: "Node.js & Express", level: "Advanced" },
-      { id: uuidv4(), name: "AWS & Docker", level: "Advanced" },
-    ],
-  });
-
+  const [resume, setResume] = useState<IResumeData>(initialResume);
+  const [isAtsLoading, setIsAtsLoading] = useState(false);
   const [pageContents, setPageContents] = useState<PageRow[][]>([]);
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const router = useRouter();
+
   const editPanelRef = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const positionRef = useRef<HTMLInputElement>(null);
@@ -110,6 +50,9 @@ const ResumeEditor = () => {
   const locationRef = useRef<HTMLInputElement>(null);
   const portfolioRef = useRef<HTMLInputElement>(null);
   const summaryRef = useRef<HTMLTextAreaElement>(null);
+
+  const setAtsReport = useSetAtom(atsReportAtom);
+  const setLoading = useSetAtom(atsLoadingAtom);
 
   const experienceRefs = useRef(createRefMap()).current;
   const educationRefs = useRef(createRefMap()).current;
@@ -136,10 +79,9 @@ const ResumeEditor = () => {
     ) => {
       setViewMode("edit");
 
-      // Broaden the type of targetRef to include all possible element types
-      let targetRef:
-        | React.RefObject<HTMLInputElement | HTMLTextAreaElement | HTMLDivElement>
-        | null = null;
+      let targetRef: React.RefObject<
+        HTMLInputElement | HTMLTextAreaElement | HTMLDivElement
+      > | null = null;
 
       switch (type) {
         case "basic":
@@ -238,7 +180,7 @@ const ResumeEditor = () => {
 
   const updateExperience = (
     id: string,
-    field: keyof Experience,
+    field: keyof IExperience,
     value: string | boolean
   ) => {
     setResume((prev) => ({
@@ -281,7 +223,7 @@ const ResumeEditor = () => {
 
   const updateEducation = (
     id: string,
-    field: keyof Education,
+    field: keyof IEducation,
     value: string | boolean
   ) => {
     setResume((prev) => ({
@@ -316,12 +258,12 @@ const ResumeEditor = () => {
     });
   };
 
-  const updateSkill = (id: string, field: keyof Skill, value: string) => {
+  const updateSkill = (id: string, field: keyof ISkill, value: string) => {
     setResume((prev) => ({
       ...prev,
       skills: prev.skills.map((skill) =>
         skill.id === id
-          ? { ...skill, [field]: value as Skill[typeof field] }
+          ? { ...skill, [field]: value as ISkill[typeof field] }
           : skill
       ),
     }));
@@ -349,7 +291,7 @@ const ResumeEditor = () => {
         );
       };
 
-      const headerBlock: Block = {
+      const headerBlock: IBlock = {
         element: (
           <div
             key="header-block"
@@ -372,7 +314,7 @@ const ResumeEditor = () => {
         height: 120,
       };
 
-      const contactBlock: Block = {
+      const contactBlock: IBlock = {
         element: (
           <div key="contact-block" className="mb-6">
             <h2 className="text-lg font-bold text-gray-900 mb-3 pb-2 border-b-2 border-indigo-600">
@@ -423,7 +365,7 @@ const ResumeEditor = () => {
         isLeftColumn: true,
       };
 
-      const skillsHeaderBlock: Block = {
+      const skillsHeaderBlock: IBlock = {
         element: (
           <div key="skills-header" className="mb-3">
             <h2 className="text-lg font-bold text-gray-900 pb-2 border-b-2 border-indigo-600">
@@ -435,7 +377,7 @@ const ResumeEditor = () => {
         isLeftColumn: true,
       };
 
-      const skillBlocks: Block[] = resume.skills.map((skill) => ({
+      const skillBlocks: IBlock[] = resume.skills.map((skill) => ({
         element: clickableWrapper(
           <div key={skill.id} className="mb-3">
             <p className="font-semibold text-gray-900 text-sm">{skill.name}</p>
@@ -449,7 +391,7 @@ const ResumeEditor = () => {
         isLeftColumn: true,
       }));
 
-      const summaryBlock: Block | null = resume.summary
+      const summaryBlock: IBlock | null = resume.summary
         ? {
             element: clickableWrapper(
               <div key="summary-block" className="mb-6">
@@ -468,7 +410,7 @@ const ResumeEditor = () => {
           }
         : null;
 
-      const experienceHeaderBlock: Block = {
+      const experienceHeaderBlock: IBlock = {
         element: (
           <div key="experience-header" className="mb-3">
             <h2 className="text-lg font-bold text-gray-900 pb-2 border-b-2 border-indigo-600">
@@ -480,13 +422,14 @@ const ResumeEditor = () => {
         isRightColumn: true,
       };
 
-      const experienceBlocks: Block[] = resume.experiences.map((exp) => ({
+      const experienceBlocks: IBlock[] = resume.experiences.map((exp) => ({
         element: clickableWrapper(
           <div key={exp.id} className="mb-5">
             <p className="font-bold text-gray-900">{exp.company}</p>
             <p className="text-sm text-indigo-600 font-semibold">{exp.title}</p>
             <p className="text-xs text-gray-600">
-              {exp.location} | {exp.startDate} - {exp.current ? "Present" : exp.endDate}
+              {exp.location} | {exp.startDate} -{" "}
+              {exp.current ? "Present" : exp.endDate}
             </p>
             <p className="text-sm text-gray-700 mt-2 leading-relaxed">
               {exp.description}
@@ -500,7 +443,7 @@ const ResumeEditor = () => {
         isRightColumn: true,
       }));
 
-      const educationHeaderBlock: Block = {
+      const educationHeaderBlock: IBlock = {
         element: (
           <div key="education-header" className="mb-3">
             <h2 className="text-lg font-bold text-gray-900 pb-2 border-b-2 border-indigo-600">
@@ -512,7 +455,7 @@ const ResumeEditor = () => {
         isRightColumn: true,
       };
 
-      const educationBlocks: Block[] = resume.education.map((edu) => ({
+      const educationBlocks: IBlock[] = resume.education.map((edu) => ({
         element: clickableWrapper(
           <div key={edu.id} className="mb-5">
             <p className="font-bold text-gray-900">
@@ -523,7 +466,8 @@ const ResumeEditor = () => {
               {edu.institution}
             </p>
             <p className="text-xs text-gray-600">
-              {edu.location} | {edu.startDate} - {edu.current ? "Present" : edu.endDate}
+              {edu.location} | {edu.startDate} -{" "}
+              {edu.current ? "Present" : edu.endDate}
             </p>
             {edu.description && (
               <p className="text-sm text-gray-700 mt-2 leading-relaxed">
@@ -539,10 +483,13 @@ const ResumeEditor = () => {
         isRightColumn: true,
       }));
 
-      // Collect all left and right column blocks
-      const leftBlocks: Block[] = [contactBlock, skillsHeaderBlock, ...skillBlocks];
+      const leftBlocks: IBlock[] = [
+        contactBlock,
+        skillsHeaderBlock,
+        ...skillBlocks,
+      ];
 
-      const rightBlocks: Block[] = [];
+      const rightBlocks: IBlock[] = [];
       if (summaryBlock) rightBlocks.push(summaryBlock);
       if (resume.experiences.length > 0) {
         rightBlocks.push(experienceHeaderBlock);
@@ -553,15 +500,20 @@ const ResumeEditor = () => {
         rightBlocks.push(...educationBlocks);
       }
 
-      // Split each column into pages independently
-      const splitColumnIntoPages = (blocks: Block[], startHeight: number = 0): PageContent[][] => {
+      const splitColumnIntoPages = (
+        blocks: IBlock[],
+        startHeight: number = 0
+      ): PageContent[][] => {
         const columnPages: PageContent[][] = [];
         let currentPage: PageContent[] = [];
         let currentHeight = startHeight;
         const PAGE_LIMIT = PAGE_HEIGHT - 80;
 
         blocks.forEach((block) => {
-          if (currentHeight + block.height > PAGE_LIMIT && currentPage.length > 0) {
+          if (
+            currentHeight + block.height > PAGE_LIMIT &&
+            currentPage.length > 0
+          ) {
             columnPages.push(currentPage);
             currentPage = [];
             currentHeight = 0;
@@ -577,24 +529,22 @@ const ResumeEditor = () => {
         return columnPages;
       };
 
-      // Split columns independently
-      const leftColumnPages = splitColumnIntoPages(leftBlocks, 120); // Account for header on first page
+      const leftColumnPages = splitColumnIntoPages(leftBlocks, 120);
       const rightColumnPages = splitColumnIntoPages(rightBlocks, 120);
 
-      // Determine total number of pages needed
-      const totalPages = Math.max(leftColumnPages.length, rightColumnPages.length);
+      const totalPages = Math.max(
+        leftColumnPages.length,
+        rightColumnPages.length
+      );
 
-      // Build final pages by combining left and right columns
       const pages: PageRow[][] = [];
       for (let i = 0; i < totalPages; i++) {
         const pageContent: PageRow[] = [];
 
-        // Add header only on first page
         if (i === 0) {
           pageContent.push(headerBlock.element);
         }
 
-        // Create the two-column row
         const leftContent = leftColumnPages[i] || [];
         const rightContent = rightColumnPages[i] || [];
 
@@ -622,78 +572,8 @@ const ResumeEditor = () => {
     splitIntoPages();
   }, [resume, handlePreviewClick]);
 
-  const [isDownloading, setIsDownloading] = useState(false);
-
   const handleDownloadPDF = async () => {
-    setIsDownloading(true);
-    try {
-      const filename = `${resume.name.replace(/\s/g, "_")}_Resume.pdf`;
-
-      const blob = await pdf(<ResumeDocument resume={resume} />).toBlob();
-
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Error generating or downloading PDF:", error);
-      // Optionally show a user-facing error message
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  const setAtsReport = useSetAtom(atsReportAtom);
-  const setLoading = useSetAtom(atsLoadingAtom);
-  const [isAtsLoading, setIsAtsLoading] = useState(false);
-
-  const formatResumeForAI = (resume: ResumeData) => {
-    return `
-Name: ${resume.name}
-Position: ${resume.position}
-Email: ${resume.email}
-Phone: ${resume.phone}
-Location: ${resume.location}
-Portfolio: ${resume.portfolio}
-
-Summary:
-${resume.summary}
-
-Work Experience:
-${resume.experiences
-  .map(
-    (exp) => `
-Company: ${exp.company}
-Title: ${exp.title}
-Location: ${exp.location}
-Date: ${exp.startDate} - ${exp.current ? "Present" : exp.endDate}
-Description: ${exp.description}
-`
-  )
-  .join("\n")}
-
-Education:
-${resume.education
-  .map(
-    (edu) => `
-Degree: ${edu.degree} in ${edu.field}
-Institution: ${edu.institution}
-Location: ${edu.location}
-Date: ${edu.startDate} - ${edu.current ? "Present" : edu.endDate}
-Description: ${edu.description}
-`
-  )
-  .join("\n")}
-
-Skills:
-${resume.skills.map((s) => `${s.name} (${s.level})`).join(", ")}
-  `;
+    DownloadPDF({ setIsDownloading, resume });
   };
 
   const handleCheckATS = async () => {
@@ -716,14 +596,12 @@ ${resume.skills.map((s) => `${s.name} (${s.level})`).join(", ")}
 
       if (response.ok && data.result) {
         if (typeof data.result === "string") {
-          // FIX APPLIED: Attempt second parse if the server returned a string
           try {
             finalReport = JSON.parse(data.result);
           } catch (e) {
             console.error("Failed to parse inner JSON string:", e);
           }
         } else {
-          // Assume it's already the parsed object
           finalReport = data.result;
         }
 
@@ -745,58 +623,14 @@ ${resume.skills.map((s) => `${s.name} (${s.level})`).join(", ")}
   return (
     <div className="md:p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6 flex justify-between items-center">
-          <Link href={"/"}>
-            <Image
-              src="/images/logo-black.png"
-              width={150}
-              height={150}
-              priority
-              alt="logo"
-            />
-          </Link>
-          <div className="flex gap-2">
-            <div className="bg-white shadow-sm rounded-full p-1 flex">
-              <button
-                onClick={() => setViewMode("edit")}
-                className={`px-3 py-2 cursor-pointer rounded-full flex items-center gap-2 transition ${
-                  viewMode === "edit"
-                    ? "bg-orange-600 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <Edit3 size={18} />
-              </button>
-              <button
-                onClick={() => setViewMode("preview")}
-                className={`px-3 py-2 cursor-pointer rounded-full flex items-center gap-2 transition ${
-                  viewMode === "preview"
-                    ? "bg-orange-600 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <Eye size={18} />
-              </button>
-            </div>
-            <button
-              onClick={handleDownloadPDF}
-              className="px-4 shadow-sm py-2 rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
-              disabled={isDownloading}
-            >
-              <Download size={18} />
-              {isDownloading ? "Generating..." : "Download "}
-            </button>
-            <button
-              onClick={handleCheckATS}
-              disabled={isAtsLoading}
-              className="px-4 py-2 shadow-sm rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
-            >
-              <Bot size={18} />
-              {isAtsLoading ? "AI is thinking.." : "Check ATS Score & AI Feedback"}
-            </button>
-          </div>
-        </div>
-
+        <ResumeHeader
+          handleCheckATS={handleCheckATS}
+          handleDownloadPDF={handleDownloadPDF}
+          isAtsLoading={isAtsLoading}
+          isDownloading={isDownloading}
+          setViewMode={setViewMode}
+          viewMode={viewMode}
+        />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {viewMode === "edit" && (
             <EditorPanel
@@ -825,12 +659,15 @@ ${resume.skills.map((s) => `${s.name} (${s.level})`).join(", ")}
               updateSkill={updateSkill}
             />
           )}
-
-          <PreviewPanel pageContents={pageContents} viewMode={viewMode} pageHeight={PAGE_HEIGHT} />
+          <PreviewPanel
+            pageContents={pageContents}
+            viewMode={viewMode}
+            pageHeight={PAGE_HEIGHT}
+          />
         </div>
       </div>
     </div>
   );
 };
 
-export default ResumeEditor;
+export default ResumeEditorIndex;

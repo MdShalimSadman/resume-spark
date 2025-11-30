@@ -1,18 +1,17 @@
-// EditorPanel.tsx
 "use client";
 
 import React from "react";
 import { Plus, Trash2 } from "lucide-react";
 import {
-  ResumeData,
-  Experience,
-  Education,
-  Skill,
-} from "./types";
+  IResumeData,
+  IExperience,
+  IEducation,
+  ISkill,
+} from "../../../types/resumeTypes";
 
-interface EditorPanelProps {
-  resume: ResumeData;
-  setResume: (r: ResumeData) => void;
+interface IEditorPanelProps {
+  resume: IResumeData;
+  setResume: (r: IResumeData) => void;
   getOrCreateRef: (
     id: string,
     refMap: Map<string, React.RefObject<HTMLDivElement | null>>
@@ -32,22 +31,22 @@ interface EditorPanelProps {
   removeExperience: (id: string) => void;
   updateExperience: (
     id: string,
-    field: keyof Experience,
+    field: keyof IExperience,
     value: string | boolean
   ) => void;
   addEducation: () => void;
   removeEducation: (id: string) => void;
   updateEducation: (
     id: string,
-    field: keyof Education,
+    field: keyof IEducation,
     value: string | boolean
   ) => void;
   addSkill: () => void;
   removeSkill: (id: string) => void;
-  updateSkill: (id: string, field: keyof Skill, value: string) => void;
+  updateSkill: (id: string, field: keyof ISkill, value: string) => void;
 }
 
-export const EditorPanel: React.FC<EditorPanelProps> = ({
+export const EditorPanel: React.FC<IEditorPanelProps> = ({
   resume,
   setResume,
   getOrCreateRef,
@@ -399,7 +398,6 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
         </div>
         {/* eslint-disable-next-line react-hooks/refs */}
         {resume.skills.map((skill) => (
-          // Attach a ref to the container of the skill block
           <div
             key={skill.id}
             ref={getOrCreateRef(skill.id, skillRefs)}

@@ -1,18 +1,12 @@
-// AnimatedScoreCircle.tsx
 "use client";
 
 import { motion } from "framer-motion";
 import React from "react";
 
-/**
- * Renders an animated SVG circle to display a score percentage.
- * The circle animates from 0% to the final score upon mount.
- */
 const AnimatedScoreCircle: React.FC<{ score: number }> = ({ score }) => {
   const circumference = 440;
-  const numericScore = Math.max(0, Math.min(100, Number(score) || 0)); // Ensure score is between 0 and 100
+  const numericScore = Math.max(0, Math.min(100, Number(score) || 0)); 
 
-  // Calculate the target offset for the final score
   const targetOffset = circumference - (numericScore / 100) * circumference;
 
   return (
@@ -24,8 +18,8 @@ const AnimatedScoreCircle: React.FC<{ score: number }> = ({ score }) => {
           cy="80"
           r="70"
           fill="transparent"
-          stroke="#fed7aa" // Base color (light orange)
-          strokeWidth="15" // Background stroke width
+          stroke="#fed7aa" 
+          strokeWidth="15" 
         />
         
         {/* Animated Score Circle - INCREASED STROKE WIDTH HERE */}
@@ -39,10 +33,9 @@ const AnimatedScoreCircle: React.FC<{ score: number }> = ({ score }) => {
           strokeDasharray={circumference}
           strokeLinecap="round"
           
-          // Framer Motion Animation Props
-          initial={{ strokeDashoffset: circumference }} // Start at 0% score (full offset)
-          animate={{ strokeDashoffset: targetOffset }} // Animate to the final score's offset
-          transition={{ duration: 2.0, ease: "easeOut" }} // Custom duration and easing
+          initial={{ strokeDashoffset: circumference }} 
+          animate={{ strokeDashoffset: targetOffset }} 
+          transition={{ duration: 2.0, ease: "easeOut" }} 
         />
       </svg>
       

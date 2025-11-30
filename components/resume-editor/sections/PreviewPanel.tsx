@@ -1,8 +1,7 @@
-// PreviewPanel.tsx
 "use client";
 
 import React from "react";
-import { PageRow, PageContent } from "./types";
+import { PageRow } from "../../../types/resumeTypes";
 
 interface PreviewPanelProps {
   pageContents: PageRow[][];
