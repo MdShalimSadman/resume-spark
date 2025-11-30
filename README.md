@@ -8,7 +8,8 @@ Check out the live demo: [https://resume-spark.vercel.app/](https://resume-spark
 - **Resume Maker:** Build professional resumes with a clean, user-friendly editor.  
 - **ATS Compatibility Report:** Get AI-powered feedback on your resume using **OpenAI's GPT-5-nano model**, including an **ATS score** and suggestions for improvement.  
 - **Resume Download:** Export your resume as a PDF using **React PDF**.  
-- **Rich Text Editing:** Customize your resume content with **React Quill** for full rich-text support.  
+- **Rich Text Editing:** Customize your resume content with **React Quill** for full rich-text support. 
+- **State Management:** Efficiently manage app state using **Jotai**. 
 
 ## Screenshots
 
