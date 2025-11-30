@@ -20,7 +20,7 @@ const HomeIndex = () => {
       />
 
       <h1
-        className="text-3xl md:text-5xl text-center font-semibold mt-7 
+        className="text-5xl text-center font-semibold mt-7 
           bg-linear-to-b from-[#FE9415] via-[#FF6D23] to-[#FA332B]
           text-transparent bg-clip-text"
       >
