@@ -8,6 +8,7 @@ import {
   IEducation,
   ISkill,
 } from "../../../types/resumeTypes";
+import QuillEditor from "@/utils/quillEditor";
 
 interface IEditorPanelProps {
   resume: IResumeData;
@@ -25,7 +26,7 @@ interface IEditorPanelProps {
   phoneRef: React.RefObject<HTMLInputElement | null>;
   locationRef: React.RefObject<HTMLInputElement | null>;
   portfolioRef: React.RefObject<HTMLInputElement | null>;
-  summaryRef: React.RefObject<HTMLTextAreaElement | null>;
+  summaryRef: React.RefObject<HTMLDivElement | null>;
   editPanelRef: React.RefObject<HTMLDivElement | null>;
   addExperience: () => void;
   removeExperience: (id: string) => void;
@@ -90,7 +91,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               type="text"
               value={resume.name}
               onChange={(e) => setResume({ ...resume, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
           </div>
           <div>
@@ -104,7 +105,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               onChange={(e) =>
                 setResume({ ...resume, position: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
           </div>
           <div>
@@ -116,7 +117,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               type="email"
               value={resume.email}
               onChange={(e) => setResume({ ...resume, email: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
           </div>
           <div>
@@ -128,7 +129,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               type="tel"
               value={resume.phone}
               onChange={(e) => setResume({ ...resume, phone: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
           </div>
           <div>
@@ -142,7 +143,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               onChange={(e) =>
                 setResume({ ...resume, location: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
           </div>
           <div>
@@ -156,28 +157,25 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               onChange={(e) =>
                 setResume({ ...resume, portfolio: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
           </div>
-          {/* Summary Input */}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Professional Summary
             </label>
-            <textarea
-              ref={summaryRef}
-              value={resume.summary}
-              onChange={(e) =>
-                setResume({ ...resume, summary: e.target.value })
-              }
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
-            />
+            <div ref={summaryRef}>
+              <QuillEditor
+                value={resume.summary}
+                onChange={(v) => setResume({ ...resume, summary: v })}
+                placeholder="Write your professional summary..."
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Work Experience */}
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">Work Experience</h2>
@@ -188,7 +186,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
             <Plus size={16} /> Add
           </button>
         </div>
-        {/* eslint-disable-next-line react-hooks/refs */}
+
         {resume.experiences.map((exp) => (
           <div
             key={exp.id}
@@ -204,6 +202,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 <Trash2 size={16} />
               </button>
             </div>
+
             <div className="space-y-3">
               <input
                 type="text"
@@ -212,15 +211,18 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 onChange={(e) =>
                   updateExperience(exp.id, "company", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
               />
               <input
                 type="text"
                 placeholder="Job Title"
                 value={exp.title}
-                onChange={(e) => updateExperience(exp.id, "title", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
+                onChange={(e) =>
+                  updateExperience(exp.id, "title", e.target.value)
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
               />
+
               <input
                 type="text"
                 placeholder="Location"
@@ -228,8 +230,9 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 onChange={(e) =>
                   updateExperience(exp.id, "location", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
               />
+
               <div className="flex flex-col md:flex-row gap-2">
                 <input
                   type="text"
@@ -238,7 +241,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                   onChange={(e) =>
                     updateExperience(exp.id, "startDate", e.target.value)
                   }
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg  text-sm"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
                 />
                 <input
                   type="text"
@@ -248,9 +251,10 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                     updateExperience(exp.id, "endDate", e.target.value)
                   }
                   disabled={exp.current}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg  text-sm disabled:bg-gray-100"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm disabled:bg-gray-100"
                 />
               </div>
+
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
@@ -258,25 +262,22 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                   onChange={(e) =>
                     updateExperience(exp.id, "current", e.target.checked)
                   }
-                  className="rounded"
                 />
                 Currently working here
               </label>
-              <textarea
-                placeholder="Description"
+
+              <QuillEditor
                 value={exp.description}
-                onChange={(e) =>
-                  updateExperience(exp.id, "description", e.target.value)
+                onChange={(v) =>
+                  updateExperience(exp.id, "description", v)
                 }
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
+                placeholder="Description"
               />
             </div>
           </div>
         ))}
       </div>
 
-      {/* Education */}
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">Education</h2>
@@ -287,9 +288,8 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
             <Plus size={16} /> Add
           </button>
         </div>
-        {/* eslint-disable-next-line react-hooks/refs */}
+
         {resume.education.map((edu) => (
-          // Attach a ref to the container of the education block
           <div
             key={edu.id}
             ref={getOrCreateRef(edu.id, educationRefs)}
@@ -304,6 +304,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 <Trash2 size={16} />
               </button>
             </div>
+
             <div className="space-y-3">
               <input
                 type="text"
@@ -312,15 +313,19 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 onChange={(e) =>
                   updateEducation(edu.id, "degree", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
               />
+
               <input
                 type="text"
                 placeholder="Field of Study"
                 value={edu.field}
-                onChange={(e) => updateEducation(edu.id, "field", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
+                onChange={(e) =>
+                  updateEducation(edu.id, "field", e.target.value)
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
               />
+
               <input
                 type="text"
                 placeholder="Institution"
@@ -328,8 +333,9 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 onChange={(e) =>
                   updateEducation(edu.id, "institution", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
               />
+
               <input
                 type="text"
                 placeholder="Location"
@@ -337,8 +343,9 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 onChange={(e) =>
                   updateEducation(edu.id, "location", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
               />
+
               <div className="flex flex-col md:flex-row gap-2">
                 <input
                   type="text"
@@ -347,7 +354,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                   onChange={(e) =>
                     updateEducation(edu.id, "startDate", e.target.value)
                   }
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg  text-sm"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
                 />
                 <input
                   type="text"
@@ -357,9 +364,10 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                     updateEducation(edu.id, "endDate", e.target.value)
                   }
                   disabled={edu.current}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg  text-sm disabled:bg-gray-100"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm disabled:bg-gray-100"
                 />
               </div>
+
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
@@ -367,25 +375,22 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                   onChange={(e) =>
                     updateEducation(edu.id, "current", e.target.checked)
                   }
-                  className="rounded"
                 />
                 Currently studying
               </label>
-              <textarea
-                placeholder="Description"
+
+              <QuillEditor
                 value={edu.description}
-                onChange={(e) =>
-                  updateEducation(edu.id, "description", e.target.value)
+                onChange={(v) =>
+                  updateEducation(edu.id, "description", v)
                 }
-                rows={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
+                placeholder="Description"
               />
             </div>
           </div>
         ))}
       </div>
 
-      {/* Skills */}
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">Skills</h2>
@@ -396,7 +401,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
             <Plus size={16} /> Add
           </button>
         </div>
-        {/* eslint-disable-next-line react-hooks/refs */}
+
         {resume.skills.map((skill) => (
           <div
             key={skill.id}
@@ -407,19 +412,25 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               type="text"
               placeholder="Skill Name"
               value={skill.name}
-              onChange={(e) => updateSkill(skill.id, "name", e.target.value)}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg  text-sm"
+              onChange={(e) =>
+                updateSkill(skill.id, "name", e.target.value)
+              }
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
             />
+
             <select
               value={skill.level}
-              onChange={(e) => updateSkill(skill.id, "level", e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg  text-sm"
+              onChange={(e) =>
+                updateSkill(skill.id, "level", e.target.value)
+              }
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
             >
               <option>Beginner</option>
               <option>Intermediate</option>
               <option>Advanced</option>
               <option>Expert</option>
             </select>
+
             <button
               onClick={() => removeSkill(skill.id)}
               className="text-red-600 hover:text-red-700"
