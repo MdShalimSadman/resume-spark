@@ -74,7 +74,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
   return (
     <div
       ref={editPanelRef}
-      className="bg-white rounded-xl shadow-lg p-6 space-y-6 max-h-[900px] overflow-y-auto"
+      className="bg-white rounded-xl border border-gray-200 p-6 space-y-6 max-h-[80vh] overflow-y-auto"
     >
       <div>
         <h2 className="text-xl font-bold text-gray-900 mb-4">
@@ -90,7 +90,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               type="text"
               value={resume.name}
               onChange={(e) => setResume({ ...resume, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
             />
           </div>
           <div>
@@ -104,7 +104,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               onChange={(e) =>
                 setResume({ ...resume, position: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
             />
           </div>
           <div>
@@ -116,7 +116,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               type="email"
               value={resume.email}
               onChange={(e) => setResume({ ...resume, email: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
             />
           </div>
           <div>
@@ -128,7 +128,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               type="tel"
               value={resume.phone}
               onChange={(e) => setResume({ ...resume, phone: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
             />
           </div>
           <div>
@@ -142,7 +142,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               onChange={(e) =>
                 setResume({ ...resume, location: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
             />
           </div>
           <div>
@@ -156,7 +156,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               onChange={(e) =>
                 setResume({ ...resume, portfolio: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
             />
           </div>
           {/* Summary Input */}
@@ -171,7 +171,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 setResume({ ...resume, summary: e.target.value })
               }
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg "
             />
           </div>
         </div>
@@ -212,14 +212,14 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 onChange={(e) =>
                   updateExperience(exp.id, "company", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
               />
               <input
                 type="text"
                 placeholder="Job Title"
                 value={exp.title}
                 onChange={(e) => updateExperience(exp.id, "title", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
               />
               <input
                 type="text"
@@ -228,7 +228,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 onChange={(e) =>
                   updateExperience(exp.id, "location", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
               />
               <div className="flex gap-2">
                 <input
@@ -238,7 +238,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                   onChange={(e) =>
                     updateExperience(exp.id, "startDate", e.target.value)
                   }
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg  text-sm"
                 />
                 <input
                   type="text"
@@ -248,7 +248,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                     updateExperience(exp.id, "endDate", e.target.value)
                   }
                   disabled={exp.current}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm disabled:bg-gray-100"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg  text-sm disabled:bg-gray-100"
                 />
               </div>
               <label className="flex items-center gap-2 text-sm">
@@ -269,7 +269,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                   updateExperience(exp.id, "description", e.target.value)
                 }
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
               />
             </div>
           </div>
@@ -312,14 +312,14 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 onChange={(e) =>
                   updateEducation(edu.id, "degree", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
               />
               <input
                 type="text"
                 placeholder="Field of Study"
                 value={edu.field}
                 onChange={(e) => updateEducation(edu.id, "field", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
               />
               <input
                 type="text"
@@ -328,7 +328,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 onChange={(e) =>
                   updateEducation(edu.id, "institution", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
               />
               <input
                 type="text"
@@ -337,7 +337,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 onChange={(e) =>
                   updateEducation(edu.id, "location", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
               />
               <div className="flex gap-2">
                 <input
@@ -347,7 +347,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                   onChange={(e) =>
                     updateEducation(edu.id, "startDate", e.target.value)
                   }
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg  text-sm"
                 />
                 <input
                   type="text"
@@ -357,7 +357,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                     updateEducation(edu.id, "endDate", e.target.value)
                   }
                   disabled={edu.current}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm disabled:bg-gray-100"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg  text-sm disabled:bg-gray-100"
                 />
               </div>
               <label className="flex items-center gap-2 text-sm">
@@ -378,7 +378,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                   updateEducation(edu.id, "description", e.target.value)
                 }
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
               />
             </div>
           </div>
@@ -408,12 +408,12 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
               placeholder="Skill Name"
               value={skill.name}
               onChange={(e) => updateSkill(skill.id, "name", e.target.value)}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg  text-sm"
             />
             <select
               value={skill.level}
               onChange={(e) => updateSkill(skill.id, "level", e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              className="px-3 py-2 border border-gray-300 rounded-lg  text-sm"
             >
               <option>Beginner</option>
               <option>Intermediate</option>

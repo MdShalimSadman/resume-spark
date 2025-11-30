@@ -56,7 +56,7 @@ const ResumeHeader: FC<IResumeHeaderProps> = ({
         </div>
         <button
           onClick={handleDownloadPDF}
-          className="px-4 shadow-sm py-2 rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
+          className="px-4 shadow-sm py-2 rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:border-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
           disabled={isDownloading}
         >
           <Download size={18} />
@@ -65,10 +65,10 @@ const ResumeHeader: FC<IResumeHeaderProps> = ({
         <button
           onClick={handleCheckATS}
           disabled={isAtsLoading}
-          className="px-4 py-2 shadow-sm rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
+          className="px-4 py-2 shadow-sm rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:border-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
         >
           <Bot size={18} />
-          {isAtsLoading ? "AI is thinking.." : "Check ATS Score & AI Feedback"}
+          {isAtsLoading ? "AI is Analyzing.." : "Check ATS Score & AI Feedback"}
         </button>
       </div>
     </div>
