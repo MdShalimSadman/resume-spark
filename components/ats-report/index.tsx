@@ -57,8 +57,8 @@ const AtsReportIndex = () => {
   ];
 
   return (
-    <div className="p-8">
-      <div className="max-w-6xl mx-auto p-10">
+    <div className="p-4 md:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto xl:p-10">
         <div className="flex items-center justify-center w-full">
           <Link href={"/"}>
             <Image
@@ -72,7 +72,8 @@ const AtsReportIndex = () => {
           </Link>
         </div>
 
-        <h1 className="text-4xl font-extrabold text-center mb-8 text-[#ea580c]">
+        <h1 className="text-2xl md:text-4xl font-extrabold text-center mb-8 bg-linear-to-b from-[#FE9415] via-[#FF6D23] to-[#FA332B]
+          text-transparent bg-clip-text">
           ATS Compatibility Report with AI Feedback
         </h1>
 

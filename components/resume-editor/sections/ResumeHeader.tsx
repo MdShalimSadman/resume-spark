@@ -84,7 +84,9 @@ const ResumeHeader: FC<IResumeHeaderProps> = ({
               ? "AI is Analyzing.."
               : "Check ATS Score & AI Feedback"}
           </p>
-          <p className="text-xs lg:hidden">ATS Score</p>
+          <p className="text-xs lg:hidden"> {isAtsLoading
+              ? "Analyzing.."
+              : "ATS Score"}</p>
         </button>
       </div>
     </div>

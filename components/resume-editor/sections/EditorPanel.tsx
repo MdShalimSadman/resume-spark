@@ -183,7 +183,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
           <h2 className="text-xl font-bold text-gray-900">Work Experience</h2>
           <button
             onClick={addExperience}
-            className="px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-1 text-sm"
+            className="cursor-pointer px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-1 text-sm"
           >
             <Plus size={16} /> Add
           </button>
@@ -282,7 +282,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
           <h2 className="text-xl font-bold text-gray-900">Education</h2>
           <button
             onClick={addEducation}
-            className="px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-1 text-sm"
+            className="cursor-pointer px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-1 text-sm"
           >
             <Plus size={16} /> Add
           </button>
@@ -391,7 +391,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
           <h2 className="text-xl font-bold text-gray-900">Skills</h2>
           <button
             onClick={addSkill}
-            className="px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-1 text-sm"
+            className="cursor-pointer px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-1 text-sm"
           >
             <Plus size={16} /> Add
           </button>
