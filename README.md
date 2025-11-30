@@ -13,10 +13,10 @@ Check out the live demo: [https://resume-spark.vercel.app/](https://resume-spark
 ## Screenshots
 
 ### Resume Editor
-![Resume Editor](/images/resume-editor.png)
+![Resume Editor](/public/images/resume-editor.png)
 
 ### ATS Report
-![ATS Report](/images/ats-report.png)
+![ATS Report](/public/images/ats-report.png)
 
 ## Getting Started
 
