@@ -1,15 +1,16 @@
-// ResumeDocument.tsx
-import React from "react";
+
 import {
   Document,
   Page,
   Text,
   View,
   StyleSheet,
-  // Font, // Not needed for standard fonts like Helvetica
 } from "@react-pdf/renderer";
+import MailIconPDF from "../icons/MailIconPDF";
+import PhoneIconPDF from "../icons/PhoneIconPDF";
+import MapPinIconPDF from "../icons/MapPinIconPDF";
+import GlobeIconPDF from "../icons/GlobeIconPDF";
 
-// --- REDEFINING TYPES INTERNALLY to avoid export/import issues from ResumeEditor.tsx ---
 interface Experience {
   id: string;
   company: string;
@@ -51,13 +52,12 @@ interface ResumeData {
   education: Education[];
   skills: Skill[];
 }
-// --------------------------------------------------------------------------------------
 
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
     padding: 30,
-    fontFamily: "Helvetica", // Changed to Helvetica
+    fontFamily: "Helvetica", 
     fontSize: 10,
   },
   header: {
@@ -65,16 +65,16 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     borderBottomStyle: "solid",
     borderBottomWidth: 4,
-    borderBottomColor: "#4f46e5", // Indigo-600
+    borderBottomColor: "#4f46e5", 
   },
   name: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#1f2937", // Gray-900
+    color: "#1f2937", 
   },
   position: {
     fontSize: 16,
-    color: "#4f46e5", // Indigo-600
+    color: "#4f46e5", 
     marginTop: 2,
   },
   contentRow: {
@@ -89,7 +89,6 @@ const styles = StyleSheet.create({
     width: "70%",
     paddingLeft: 10,
   },
-  // Section Header
   sectionHeader: {
     fontSize: 12,
     fontWeight: "bold",
@@ -100,7 +99,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: "#4f46e5",
   },
-  // Contact
   contactItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -110,7 +108,6 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     color: "#374151",
   },
-  // Summary
   summary: {
     marginBottom: 15,
   },
@@ -164,29 +161,31 @@ interface ResumeDocumentProps {
   resume: ResumeData;
 }
 
-// Contact Icons (Simple text representation, as Lucide icons are not available in react-pdf)
-const ContactIcon = ({ children }: { children: React.ReactNode }) => (
-  <Text style={{ color: "#4f46e5" }}>{children}</Text>
-);
 
 const Contact = ({ resume }: { resume: ResumeData }) => (
   <View style={{ marginBottom: 15 }}>
     <Text style={styles.sectionHeader}>CONTACT</Text>
     <View style={styles.contactItem}>
-      <ContactIcon>✉</ContactIcon>
+        <MailIconPDF size={10} color="#4f39f6"/>
+  
       <Text style={styles.contactText}>{resume.email}</Text>
     </View>
     <View style={styles.contactItem}>
-      <ContactIcon>☎</ContactIcon>
+        <PhoneIconPDF size={10} color="#4f39f6"/>
+
       <Text style={styles.contactText}>{resume.phone}</Text>
     </View>
     <View style={styles.contactItem}>
-      <ContactIcon>⌕</ContactIcon>
+
+        <MapPinIconPDF size={10} color="#4f39f6"/>
+    
       <Text style={styles.contactText}>{resume.location}</Text>
     </View>
     {resume.portfolio && (
       <View style={styles.contactItem}>
-        <ContactIcon>🌐</ContactIcon>
+    
+          <GlobeIconPDF size={10} color="#4f39f6"/>
+      
         <Text style={styles.contactText}>{resume.portfolio}</Text>
       </View>
     )}
@@ -260,7 +259,7 @@ const Education = ({ education }: { education: Education[] }) =>
     </View>
   ) : null;
 
-// The main Document component
+
 export const ResumeDocument = ({ resume }: ResumeDocumentProps) => (
   <Document>
     <Page size="A4" style={styles.page}>

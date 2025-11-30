@@ -29,9 +29,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Provider>
-        <div className="relative ">
-          <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-[#FE9415] rounded-full blur-[140px] opacity-40 z-[-1] animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-[350px] h-[350px] bg-[#FA332B] rounded-full blur-[140px] opacity-35 z-[-1] animate-pulse" />
+        <div className="relative">
+          <div className="fixed top-0 right-0 w-[350px] h-[350px] bg-[#FE9415] rounded-full blur-[140px] opacity-40 z-[-1] animate-pulse" />
+          <div className="fixed bottom-0 left-0 w-[350px] h-[350px] bg-[#FA332B] rounded-full blur-[140px] opacity-35 z-[-1] animate-pulse" />
           {children}
         </div>
         </Provider>
