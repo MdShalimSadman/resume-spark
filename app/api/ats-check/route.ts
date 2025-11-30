@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
     const prompt = `
 You are an expert ATS (Applicant Tracking System) analyzer.
-Evaluate the resume below against typical ATS parsing rules and current job market standards for the target role (Senior Software Engineer).
+Evaluate the resume below against typical ATS parsing rules and current job market standards for the target role (position mentioned in the resume).
 
 Resume:${resume}
 

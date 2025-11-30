@@ -1,6 +1,4 @@
-
-import ResumeEditor from '@/components/ResumeEditor'
-
+import ResumeEditor from "@/components/resume-editor/ResumeEditor"
 
 const Page = () => {
   return (

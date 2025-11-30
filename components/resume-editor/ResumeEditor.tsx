@@ -1,3 +1,4 @@
+// ResumeEditor.tsx
 "use client";
 
 import {
@@ -14,15 +15,13 @@ import {
   Phone,
   MapPin,
   Globe,
-  Plus,
-  Trash2,
   Eye,
   Edit3,
   Download,
   Bot,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-import { ResumeDocument } from "./ResumeDocument";
+import { ResumeDocument } from "../ResumeDocument";
 import { pdf } from "@react-pdf/renderer";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,61 +29,19 @@ import { useSetAtom } from "jotai";
 import { atsReportAtom, atsLoadingAtom, AtsReportData } from "@/atoms/atsAtom";
 import { useRouter } from "next/navigation";
 
-interface Experience {
-  id: string;
-  company: string;
-  title: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  current: boolean;
-  description: string;
-}
-
-interface Education {
-  id: string;
-  degree: string;
-  field: string;
-  institution: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  current: boolean;
-  description: string;
-}
-
-interface Skill {
-  id: string;
-  name: string;
-  level: "Beginner" | "Intermediate" | "Advanced" | "Expert";
-}
-
-interface ResumeData {
-  name: string;
-  position: string;
-  email: string;
-  phone: string;
-  location: string;
-  portfolio: string;
-  summary: string;
-  experiences: Experience[];
-  education: Education[];
-  skills: Skill[];
-}
-
-interface Block {
-  element: ReactElement;
-  height: number;
-  isLeftColumn?: boolean;
-  isRightColumn?: boolean;
-}
-
-type PageContent = ReactElement;
-type PageRow = ReactElement;
-
-const PAGE_HEIGHT = 1000;
-
-const createRefMap = () => new Map<string, React.RefObject<HTMLDivElement>>();
+import EditorPanel from "./EditorPanel";
+import PreviewPanel from "./PreviewPanel";
+import {
+  Experience,
+  Education,
+  Skill,
+  ResumeData,
+  Block,
+  PageContent,
+  PageRow,
+  PAGE_HEIGHT,
+  createRefMap,
+} from "./types";
 
 const ResumeEditor = () => {
   const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
@@ -179,14 +136,13 @@ const ResumeEditor = () => {
     ) => {
       setViewMode("edit");
 
-      // FIX 1: Broaden the type of targetRef to include all possible element types (HTMLInputElement, HTMLTextAreaElement, HTMLDivElement)
-      let targetRef: React.RefObject<
-        HTMLInputElement | HTMLTextAreaElement | HTMLDivElement
-      > | null = null;
+      // Broaden the type of targetRef to include all possible element types
+      let targetRef:
+        | React.RefObject<HTMLInputElement | HTMLTextAreaElement | HTMLDivElement>
+        | null = null;
 
       switch (type) {
         case "basic":
-          // Assigning specific Refs (nameRef, summaryRef, etc.) to the broader targetRef
           if (refKey === "name")
             targetRef = nameRef as React.RefObject<HTMLInputElement>;
           if (refKey === "position")
@@ -530,8 +486,7 @@ const ResumeEditor = () => {
             <p className="font-bold text-gray-900">{exp.company}</p>
             <p className="text-sm text-indigo-600 font-semibold">{exp.title}</p>
             <p className="text-xs text-gray-600">
-              {exp.location} | {exp.startDate} -{" "}
-              {exp.current ? "Present" : exp.endDate}
+              {exp.location} | {exp.startDate} - {exp.current ? "Present" : exp.endDate}
             </p>
             <p className="text-sm text-gray-700 mt-2 leading-relaxed">
               {exp.description}
@@ -568,8 +523,7 @@ const ResumeEditor = () => {
               {edu.institution}
             </p>
             <p className="text-xs text-gray-600">
-              {edu.location} | {edu.startDate} -{" "}
-              {edu.current ? "Present" : edu.endDate}
+              {edu.location} | {edu.startDate} - {edu.current ? "Present" : edu.endDate}
             </p>
             {edu.description && (
               <p className="text-sm text-gray-700 mt-2 leading-relaxed">
@@ -586,11 +540,7 @@ const ResumeEditor = () => {
       }));
 
       // Collect all left and right column blocks
-      const leftBlocks: Block[] = [
-        contactBlock,
-        skillsHeaderBlock,
-        ...skillBlocks,
-      ];
+      const leftBlocks: Block[] = [contactBlock, skillsHeaderBlock, ...skillBlocks];
 
       const rightBlocks: Block[] = [];
       if (summaryBlock) rightBlocks.push(summaryBlock);
@@ -604,21 +554,14 @@ const ResumeEditor = () => {
       }
 
       // Split each column into pages independently
-      const splitColumnIntoPages = (
-        blocks: Block[],
-        startHeight: number = 0
-      ): PageContent[][] => {
+      const splitColumnIntoPages = (blocks: Block[], startHeight: number = 0): PageContent[][] => {
         const columnPages: PageContent[][] = [];
         let currentPage: PageContent[] = [];
         let currentHeight = startHeight;
         const PAGE_LIMIT = PAGE_HEIGHT - 80;
 
         blocks.forEach((block) => {
-          if (
-            currentHeight + block.height > PAGE_LIMIT &&
-            currentPage.length > 0
-          ) {
-            // Start new page
+          if (currentHeight + block.height > PAGE_LIMIT && currentPage.length > 0) {
             columnPages.push(currentPage);
             currentPage = [];
             currentHeight = 0;
@@ -639,10 +582,7 @@ const ResumeEditor = () => {
       const rightColumnPages = splitColumnIntoPages(rightBlocks, 120);
 
       // Determine total number of pages needed
-      const totalPages = Math.max(
-        leftColumnPages.length,
-        rightColumnPages.length
-      );
+      const totalPages = Math.max(leftColumnPages.length, rightColumnPages.length);
 
       // Build final pages by combining left and right columns
       const pages: PageRow[][] = [];
@@ -757,7 +697,6 @@ ${resume.skills.map((s) => `${s.name} (${s.level})`).join(", ")}
   };
 
   const handleCheckATS = async () => {
-    
     setIsAtsLoading(true);
     setLoading(true);
     setAtsReport(null);
@@ -790,7 +729,7 @@ ${resume.skills.map((s) => `${s.name} (${s.level})`).join(", ")}
 
         if (finalReport) {
           setAtsReport(finalReport as AtsReportData);
-          router.push("/ats-report"); 
+          router.push("/ats-report");
         }
       } else {
         console.error("API Error:", data.error || "Failed to analyze resume.");
@@ -850,422 +789,44 @@ ${resume.skills.map((s) => `${s.name} (${s.level})`).join(", ")}
             <button
               onClick={handleCheckATS}
               disabled={isAtsLoading}
-               className="px-4 py-2 shadow-sm rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
+              className="px-4 py-2 shadow-sm rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
             >
-              <Bot size={18}/>
-              {isAtsLoading? "AI is thinking..":"Check ATS Score & AI Feedback"}
+              <Bot size={18} />
+              {isAtsLoading ? "AI is thinking.." : "Check ATS Score & AI Feedback"}
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {viewMode === "edit" && (
-            <div
-              ref={editPanelRef}
-              className="bg-white rounded-xl shadow-lg p-6 space-y-6 max-h-[900px] overflow-y-auto"
-            >
-              <div>
-                <h2 className="text-xl font-bold text-gray-900 mb-4">
-                  Personal Information
-                </h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Name
-                    </label>
-                    <input
-                      ref={nameRef}
-                      type="text"
-                      value={resume.name}
-                      onChange={(e) =>
-                        setResume({ ...resume, name: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Position
-                    </label>
-                    <input
-                      ref={positionRef}
-                      type="text"
-                      value={resume.position}
-                      onChange={(e) =>
-                        setResume({ ...resume, position: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email
-                    </label>
-                    <input
-                      ref={emailRef}
-                      type="email"
-                      value={resume.email}
-                      onChange={(e) =>
-                        setResume({ ...resume, email: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone
-                    </label>
-                    <input
-                      ref={phoneRef}
-                      type="tel"
-                      value={resume.phone}
-                      onChange={(e) =>
-                        setResume({ ...resume, phone: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Location
-                    </label>
-                    <input
-                      ref={locationRef}
-                      type="text"
-                      value={resume.location}
-                      onChange={(e) =>
-                        setResume({ ...resume, location: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Portfolio/Website
-                    </label>
-                    <input
-                      ref={portfolioRef}
-                      type="text"
-                      value={resume.portfolio}
-                      onChange={(e) =>
-                        setResume({ ...resume, portfolio: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    />
-                  </div>
-                  {/* Summary Input */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Professional Summary
-                    </label>
-                    <textarea
-                      ref={summaryRef}
-                      value={resume.summary}
-                      onChange={(e) =>
-                        setResume({ ...resume, summary: e.target.value })
-                      }
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Work Experience */}
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">
-                    Work Experience
-                  </h2>
-                  <button
-                    onClick={addExperience}
-                    className="px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-1 text-sm"
-                  >
-                    <Plus size={16} /> Add
-                  </button>
-                </div>
-                {/* eslint-disable-next-line react-hooks/refs */}
-                {resume.experiences.map((exp) => (
-                  <div
-                    key={exp.id}
-                    ref={getOrCreateRef(exp.id, experienceRefs)}
-                    className="mb-4 p-4 border border-gray-200 rounded-lg"
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-semibold text-gray-900">
-                        Experience
-                      </h3>
-                      <button
-                        onClick={() => removeExperience(exp.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                    <div className="space-y-3">
-                      <input
-                        type="text"
-                        placeholder="Company Name"
-                        value={exp.company}
-                        onChange={(e) =>
-                          updateExperience(exp.id, "company", e.target.value)
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Job Title"
-                        value={exp.title}
-                        onChange={(e) =>
-                          updateExperience(exp.id, "title", e.target.value)
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Location"
-                        value={exp.location}
-                        onChange={(e) =>
-                          updateExperience(exp.id, "location", e.target.value)
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                      />
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          placeholder="Start Date"
-                          value={exp.startDate}
-                          onChange={(e) =>
-                            updateExperience(
-                              exp.id,
-                              "startDate",
-                              e.target.value
-                            )
-                          }
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                        />
-                        <input
-                          type="text"
-                          placeholder="End Date"
-                          value={exp.endDate}
-                          onChange={(e) =>
-                            updateExperience(exp.id, "endDate", e.target.value)
-                          }
-                          disabled={exp.current}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm disabled:bg-gray-100"
-                        />
-                      </div>
-                      <label className="flex items-center gap-2 text-sm">
-                        <input
-                          type="checkbox"
-                          checked={exp.current}
-                          onChange={(e) =>
-                            updateExperience(
-                              exp.id,
-                              "current",
-                              e.target.checked
-                            )
-                          }
-                          className="rounded"
-                        />
-                        Currently working here
-                      </label>
-                      <textarea
-                        placeholder="Description"
-                        value={exp.description}
-                        onChange={(e) =>
-                          updateExperience(
-                            exp.id,
-                            "description",
-                            e.target.value
-                          )
-                        }
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Education */}
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">Education</h2>
-                  <button
-                    onClick={addEducation}
-                    className="px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-1 text-sm"
-                  >
-                    <Plus size={16} /> Add
-                  </button>
-                </div>
-                {/* eslint-disable-next-line react-hooks/refs */}
-                {resume.education.map((edu) => (
-                  // Attach a ref to the container of the education block
-                  <div
-                    key={edu.id}
-                    ref={getOrCreateRef(edu.id, educationRefs)}
-                    className="mb-4 p-4 border border-gray-200 rounded-lg"
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-semibold text-gray-900">Education</h3>
-                      <button
-                        onClick={() => removeEducation(edu.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                    <div className="space-y-3">
-                      <input
-                        type="text"
-                        placeholder="Degree"
-                        value={edu.degree}
-                        onChange={(e) =>
-                          updateEducation(edu.id, "degree", e.target.value)
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Field of Study"
-                        value={edu.field}
-                        onChange={(e) =>
-                          updateEducation(edu.id, "field", e.target.value)
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Institution"
-                        value={edu.institution}
-                        onChange={(e) =>
-                          updateEducation(edu.id, "institution", e.target.value)
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Location"
-                        value={edu.location}
-                        onChange={(e) =>
-                          updateEducation(edu.id, "location", e.target.value)
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                      />
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          placeholder="Start Year"
-                          value={edu.startDate}
-                          onChange={(e) =>
-                            updateEducation(edu.id, "startDate", e.target.value)
-                          }
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                        />
-                        <input
-                          type="text"
-                          placeholder="End Year"
-                          value={edu.endDate}
-                          onChange={(e) =>
-                            updateEducation(edu.id, "endDate", e.target.value)
-                          }
-                          disabled={edu.current}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm disabled:bg-gray-100"
-                        />
-                      </div>
-                      <label className="flex items-center gap-2 text-sm">
-                        <input
-                          type="checkbox"
-                          checked={edu.current}
-                          onChange={(e) =>
-                            updateEducation(edu.id, "current", e.target.checked)
-                          }
-                          className="rounded"
-                        />
-                        Currently studying
-                      </label>
-                      <textarea
-                        placeholder="Description"
-                        value={edu.description}
-                        onChange={(e) =>
-                          updateEducation(edu.id, "description", e.target.value)
-                        }
-                        rows={2}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Skills */}
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">Skills</h2>
-                  <button
-                    onClick={addSkill}
-                    className="px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-1 text-sm"
-                  >
-                    <Plus size={16} /> Add
-                  </button>
-                </div>
-                {/* eslint-disable-next-line react-hooks/refs */}
-                {resume.skills.map((skill) => (
-                  // Attach a ref to the container of the skill block
-                  <div
-                    key={skill.id}
-                    ref={getOrCreateRef(skill.id, skillRefs)}
-                    className="mb-3 p-3 border border-gray-200 rounded-lg flex gap-3 items-center"
-                  >
-                    <input
-                      type="text"
-                      placeholder="Skill Name"
-                      value={skill.name}
-                      onChange={(e) =>
-                        updateSkill(skill.id, "name", e.target.value)
-                      }
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                    />
-                    <select
-                      value={skill.level}
-                      onChange={(e) =>
-                        updateSkill(skill.id, "level", e.target.value)
-                      }
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                    >
-                      <option>Beginner</option>
-                      <option>Intermediate</option>
-                      <option>Advanced</option>
-                      <option>Expert</option>
-                    </select>
-                    <button
-                      onClick={() => removeSkill(skill.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <EditorPanel
+              resume={resume}
+              setResume={setResume}
+              getOrCreateRef={getOrCreateRef}
+              experienceRefs={experienceRefs}
+              educationRefs={educationRefs}
+              skillRefs={skillRefs}
+              nameRef={nameRef}
+              positionRef={positionRef}
+              emailRef={emailRef}
+              phoneRef={phoneRef}
+              locationRef={locationRef}
+              portfolioRef={portfolioRef}
+              summaryRef={summaryRef}
+              editPanelRef={editPanelRef}
+              addExperience={addExperience}
+              removeExperience={removeExperience}
+              updateExperience={updateExperience}
+              addEducation={addEducation}
+              removeEducation={removeEducation}
+              updateEducation={updateEducation}
+              addSkill={addSkill}
+              removeSkill={removeSkill}
+              updateSkill={updateSkill}
+            />
           )}
 
-          <div className={viewMode === "preview" ? "lg:col-span-2" : ""}>
-            <div className="space-y-4 shadow-lg overflow-auto">
-              {pageContents.map((page, pageIndex) => (
-                <div
-                  key={pageIndex}
-                  className="bg-white rounded-xl shadow-xl p-8"
-                  style={{ height: PAGE_HEIGHT, overflow: "hidden" }}
-                >
-                  {page.map((content: PageRow, idx: number) => (
-                    <div key={idx}>{content}</div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+          <PreviewPanel pageContents={pageContents} viewMode={viewMode} pageHeight={PAGE_HEIGHT} />
         </div>
       </div>
     </div>

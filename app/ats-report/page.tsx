@@ -76,6 +76,7 @@ const AtsReportPage = () => {
             src="/images/logo-black.png"
             width={150}
             height={150}
+            priority
             alt="logo"
             className="mb-6"
           />

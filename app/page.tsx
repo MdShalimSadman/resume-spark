@@ -81,6 +81,7 @@ const Page = () => {
         width={250}
         height={100}
         alt="logo"
+        priority
         className="mt-7"
       />
 
@@ -115,6 +116,7 @@ const Page = () => {
                   src={t.src}
                   alt={t.alt}
                   fill
+                  priority
                   className="object-cover rounded-xl"
                 />
               </Link>
@@ -122,6 +124,7 @@ const Page = () => {
               <Image
                 src={t.src}
                 alt={t.alt}
+                priority
                 fill
                 className="object-cover rounded-xl "
               />
