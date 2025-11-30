@@ -21,15 +21,15 @@ const HomeIndex = () => {
 
       <h1
         className="text-3xl md:text-5xl text-center font-semibold mt-7 
-          md:bg-linear-to-b md:from-[#FE9415] md:via-[#FF6D23] md:to-[#FA332B]
-          md:text-transparent md:bg-clip-text text-white"
+          bg-linear-to-b from-[#FE9415] via-[#FF6D23] to-[#FA332B]
+          text-transparent bg-clip-text"
       >
         Spark Your Potential with Professional Resumes
       </h1>
 
       <TypingText />
 
-      <h3 className="mt-18 text-2xl font-semibold text-white md:text-gray-600">
+      <h3 className="mt-18 text-2xl font-semibold text-gray-600">
         Popular templates
       </h3>
       <div className="mt-10 flex flex-col md:flex-row gap-7 items-center justify-center">
