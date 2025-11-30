@@ -49,7 +49,7 @@ const ResumeEditorIndex = () => {
   const phoneRef = useRef<HTMLInputElement>(null);
   const locationRef = useRef<HTMLInputElement>(null);
   const portfolioRef = useRef<HTMLInputElement>(null);
-  const summaryRef = useRef<HTMLTextAreaElement>(null);
+  const summaryRef = useRef<HTMLDivElement | null>(null);
 
   const setAtsReport = useSetAtom(atsReportAtom);
   const setLoading = useSetAtom(atsLoadingAtom);
@@ -98,7 +98,7 @@ const ResumeEditorIndex = () => {
           if (refKey === "portfolio")
             targetRef = portfolioRef as React.RefObject<HTMLInputElement>;
           if (refKey === "summary")
-            targetRef = summaryRef as React.RefObject<HTMLTextAreaElement>;
+            targetRef = summaryRef as React.RefObject<HTMLDivElement>;
           break;
         case "experience":
           targetRef = experienceRefs.get(id || "") || null;
@@ -398,9 +398,10 @@ const ResumeEditorIndex = () => {
                 <h2 className="text-lg font-bold text-gray-900 mb-3 pb-2 border-b-2 border-indigo-600">
                   PROFESSIONAL SUMMARY
                 </h2>
-                <p className="text-sm text-gray-700 leading-relaxed">
-                  {resume.summary}
-                </p>
+                <div
+                  className="-ml-3 ql-editor text-sm text-gray-700 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: resume.summary }}
+                />
               </div>,
               "summary",
               "basic"
@@ -431,9 +432,10 @@ const ResumeEditorIndex = () => {
               {exp.location} | {exp.startDate} -{" "}
               {exp.current ? "Present" : exp.endDate}
             </p>
-            <p className="text-sm text-gray-700 mt-2 leading-relaxed">
-              {exp.description}
-            </p>
+            <div
+              className="-ml-3 ql-editor text-sm text-gray-700 mt-2 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: exp.description }}
+            />
           </div>,
           "experience",
           "experience",
@@ -470,9 +472,10 @@ const ResumeEditorIndex = () => {
               {edu.current ? "Present" : edu.endDate}
             </p>
             {edu.description && (
-              <p className="text-sm text-gray-700 mt-2 leading-relaxed">
-                {edu.description}
-              </p>
+              <div
+                className="-ml-3 ql-editor text-sm text-gray-700 mt-2 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: edu.description }}
+              />
             )}
           </div>,
           "education",
