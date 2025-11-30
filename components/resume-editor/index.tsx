@@ -621,7 +621,7 @@ const ResumeEditorIndex = () => {
   };
 
   return (
-    <div className="md:p-8">
+    <div className="md:p-8 pb-0! md:pb-2!">
       <div className="max-w-7xl mx-auto">
         <ResumeHeader
           handleCheckATS={handleCheckATS}

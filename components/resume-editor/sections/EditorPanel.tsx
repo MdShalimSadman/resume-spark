@@ -230,7 +230,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
               />
-              <div className="flex gap-2">
+              <div className="flex flex-col md:flex-row gap-2">
                 <input
                   type="text"
                   placeholder="Start Date"
@@ -339,7 +339,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-sm"
               />
-              <div className="flex gap-2">
+              <div className="flex flex-col md:flex-row gap-2">
                 <input
                   type="text"
                   placeholder="Start Year"
@@ -401,7 +401,7 @@ export const EditorPanel: React.FC<IEditorPanelProps> = ({
           <div
             key={skill.id}
             ref={getOrCreateRef(skill.id, skillRefs)}
-            className="mb-3 p-3 border border-gray-200 rounded-lg flex gap-3 items-center"
+            className="mb-3 p-3 border border-gray-200 rounded-lg flex flex-col md:flex-row gap-3 md:items-center"
           >
             <input
               type="text"

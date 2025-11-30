@@ -16,11 +16,11 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
 }) => {
   return (
     <div className={viewMode === "preview" ? "lg:col-span-2 mx-auto" : "max-h-[80vh] overflow-auto"}>
-      <div className="space-y-4 pr-1 overflow-auto">
+      <div className="hidden lg:block space-y-4 pr-1 overflow-auto">
         {pageContents.map((page, pageIndex) => (
           <div
             key={pageIndex}
-            className="bg-white border border-gray-200  rounded-xl  p-8 max-w-2xl "
+            className="bg-white border border-gray-200  rounded-xl  p-8 max-w-2xl! "
             style={{ height: pageHeight, overflow: "hidden" }}
           >
             {page.map((content: PageRow, idx: number) => (

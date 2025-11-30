@@ -21,7 +21,7 @@ const ResumeHeader: FC<IResumeHeaderProps> = ({
   isAtsLoading,
 }) => {
   return (
-    <div className="mb-6 flex justify-between items-center">
+    <div className="md:mb-6 mb-3 flex justify-between items-center p-3 md:p-0">
       <Link href={"/"}>
         <Image
           src="/images/logo-black.png"
@@ -29,10 +29,19 @@ const ResumeHeader: FC<IResumeHeaderProps> = ({
           height={150}
           priority
           alt="logo"
+          className="hidden md:block"
+        />
+        <Image
+          src="/images/mobile-logo.png"
+          width={40}
+          height={40}
+          priority
+          alt="logo"
+          className="md:hidden"
         />
       </Link>
       <div className="flex gap-2">
-        <div className="bg-white shadow-sm rounded-full p-1 flex">
+        <div className="hidden bg-white shadow-sm rounded-full p-1 lg:flex">
           <button
             onClick={() => setViewMode("edit")}
             className={`px-3 py-2 cursor-pointer rounded-full flex items-center gap-2 transition ${
@@ -56,19 +65,26 @@ const ResumeHeader: FC<IResumeHeaderProps> = ({
         </div>
         <button
           onClick={handleDownloadPDF}
-          className="px-4 shadow-sm py-2 rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:border-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
+          className="px-4 shadow-sm py-2 rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:border-orange-300 disabled:text-white duration-200 cursor-pointer"
           disabled={isDownloading}
         >
           <Download size={18} />
-          {isDownloading ? "Generating..." : "Download "}
+          <p className="hidden lg:block">
+            {isDownloading ? "Generating..." : "Download "}
+          </p>
         </button>
         <button
           onClick={handleCheckATS}
           disabled={isAtsLoading}
-          className="px-4 py-2 shadow-sm rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:border-orange-300 disabled:text-white transition-all duration-200 cursor-pointer"
+          className="px-4 py-2 shadow-sm rounded-lg flex items-center gap-2 transition bg-white text-orange-600 border border-orange-600  hover:text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:border-orange-300 disabled:text-white duration-200 cursor-pointer"
         >
-          <Bot size={18} />
-          {isAtsLoading ? "AI is Analyzing.." : "Check ATS Score & AI Feedback"}
+          <Bot size={18} className="hidden lg:block" />
+          <p className="hidden lg:block">
+            {isAtsLoading
+              ? "AI is Analyzing.."
+              : "Check ATS Score & AI Feedback"}
+          </p>
+          <p className="text-xs lg:hidden">ATS Score</p>
         </button>
       </div>
     </div>
