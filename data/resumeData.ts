@@ -2,12 +2,12 @@ import { IResumeData } from "@/types/resumeTypes";
 import { v4 as uuidv4 } from "uuid";
 
 export const initialResume : IResumeData = {
-  name: "John Doe",
+  name: "John Cena",
   position: "Senior Software Engineer",
-  email: "john.doe@email.com",
+  email: "john.cena@email.com",
   phone: "+1 (555) 123-4567",
   location: "San Francisco, CA",
-  portfolio: "www.johndoe.dev",
+  portfolio: "www.johncena.dev",
   summary:
     "Experienced software engineer with 8+ years of expertise in full-stack development, specializing in React, Node.js, and cloud technologies.",
   experiences: [

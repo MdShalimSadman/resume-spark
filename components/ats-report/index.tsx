@@ -72,7 +72,7 @@ const AtsReportIndex = () => {
           </Link>
         </div>
 
-        <h1 className="text-2xl md:text-4xl font-extrabold text-center mb-8 bg-linear-to-b from-[#FE9415] via-[#FF6D23] to-[#FA332B]
+        <h1 className="text-4xl font-extrabold text-center mb-8 bg-linear-to-b from-[#FE9415] via-[#FF6D23] to-[#FA332B]
           text-transparent bg-clip-text">
           ATS Compatibility Report with AI Feedback
         </h1>
